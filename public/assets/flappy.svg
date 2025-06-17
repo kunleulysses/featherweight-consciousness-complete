@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <ellipse cx="256" cy="280" rx="160" ry="140" fill="#B2D4FF"/>
+  
+  <!-- Wings -->
+  <path d="M120 220C80 180 50 200 40 220C30 240 30 280 60 320C90 360 140 380 160 320C180 260 160 260 120 220Z" fill="#7AADFF"/>
+  <path d="M392 220C432 180 462 200 472 220C482 240 482 280 452 320C422 360 372 380 352 320C332 260 352 260 392 220Z" fill="#7AADFF"/>
+  
+  <!-- Head -->
+  <circle cx="256" cy="180" r="80" fill="#CCEAFF"/>
+  
+  <!-- Eyes -->
+  <circle cx="226" cy="160" r="15" fill="#333333"/>
+  <circle cx="286" cy="160" r="15" fill="#333333"/>
+  <circle cx="222" cy="156" r="5" fill="white"/>
+  <circle cx="282" cy="156" r="5" fill="white"/>
+  
+  <!-- Beak -->
+  <path d="M256 180 L196 240 L316 240 Z" fill="#FFB442"/>
+  <path d="M196 240 L256 270 L316 240 Z" fill="#FF9800"/>
+  
+  <!-- Feet -->
+  <path d="M210 400 L180 440 L210 450 L240 440 Z" fill="#FF9800"/>
+  <path d="M302 400 L272 440 L302 450 L332 440 Z" fill="#FF9800"/>
+  
+  <!-- Details -->
+  <path d="M226 200 C236 210 276 210 286 200" stroke="#333333" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Star/cosmic effect -->
+  <circle cx="180" cy="120" r="5" fill="white" opacity="0.8"/>
+  <circle cx="320" cy="100" r="4" fill="white" opacity="0.8"/>
+  <circle cx="290" cy="80" r="3" fill="white" opacity="0.8"/>
+  <circle cx="200" cy="90" r="3" fill="white" opacity="0.8"/>
+  <circle cx="150" cy="150" r="2" fill="white" opacity="0.8"/>
+  <circle cx="350" cy="150" r="2" fill="white" opacity="0.8"/>
+  
+  <!-- Little stars -->
+  <path d="M170 110 L172 112 L174 110 L172 108 Z" fill="white"/>
+  <path d="M330 120 L332 122 L334 120 L332 118 Z" fill="white"/>
+  <path d="M210 80 L212 82 L214 80 L212 78 Z" fill="white"/>
+</svg>

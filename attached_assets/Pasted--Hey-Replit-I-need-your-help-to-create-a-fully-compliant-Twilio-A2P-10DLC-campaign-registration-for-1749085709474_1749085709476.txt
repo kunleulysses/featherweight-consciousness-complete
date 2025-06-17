@@ -1,0 +1,71 @@
+"Hey Replit,
+I need your help to create a fully compliant Twilio A2P 10DLC campaign registration for my service, featherweight.world. My previous submission was rejected, primarily due to issues with the 'End User Consent' (Message Flow / Call-to-Action) section not being clear or verifiable enough for Twilio and CTIA guidelines.
+The most important change is: SMS opt-in will now occur during the general user sign-up process for featherweight.world, not just for a premium tier.
+Please help me generate the exact text and any necessary guidance for the following sections of the Twilio campaign registration form. We need to ensure everything is clear, conspicuous, and verifiable.
+1. How do end-users consent to receive messages? (Message Flow / Call-to-Action)
+Context: This is where users will opt-in during general sign-up on featherweight.world.
+Requirement: Provide the text for this field. It needs to clearly describe the web-based opt-in flow.
+It should explicitly mention:
+That opt-in happens during general website signup at featherweight.world.
+That a publicly accessible screenshot of the sign-up page's opt-in mechanism will be provided (I will create this and host it).
+The exact Call-to-Action language that will be displayed next to the opt-in checkbox on the sign-up page. This language must include:
+Program/Brand Name (Featherweight.world).
+Purpose of messages (e.g., "AI chat, wellness tips, and account updates").
+Statement of consent and confirmation of phone number ownership.
+"Message and data rates may apply."
+"Message frequency varies."
+"Reply HELP for help, STOP to cancel."
+"Consent is not a condition of any purchase or service."
+Clear links to the Privacy Policy and Terms of Service on featherweight.world.
+A statement that the Privacy Policy and Terms of Service are publicly accessible on featherweight.world and that the Privacy Policy contains the required clause about not sharing mobile information for marketing/promotional purposes with third parties.
+2. Opt-in Keywords:
+Since opt-in is primarily web-based during signup, this will likely just be START (for users to re-subscribe if they've opted out). Please confirm if any other keywords are standard here.
+3. Opt-in Message (Confirmation Message):
+Requirement: The text for the SMS sent immediately after a user successfully opts-in via the website.
+Must include:
+Brand name (Featherweight.world).
+Confirmation of opt-in and brief description of the service (e.g., "for AI chat & wellness").
+"Message and data rates may apply."
+"Message frequency varies."
+"Reply HELP for help, STOP to unsubscribe."
+4. Opt-out Keywords:
+Suggest a comprehensive list (e.g., STOP, UNSUBSCRIBE, END, QUIT, CANCEL, OPTOUT, REVOKE, STOPALL).
+5. Opt-out Message (Confirmation of Opt-Out):
+Requirement: The text for the SMS sent when a user successfully opts out.
+Must include:
+Brand name (Featherweight.world).
+Confirmation of successful unsubscription.
+Statement that no more messages will be sent from that number.
+Instruction to reply START to resubscribe.
+6. Help Keywords:
+Suggest standard keywords (e.g., HELP, INFO).
+7. Help Message (Response to HELP Keyword):
+Requirement: The text for the SMS sent when a user texts a HELP keyword.
+Must include:
+Brand name (Featherweight.world).
+Customer care contact information (e.g., link to a support page on featherweight.world or a support email address).
+"Message and data rates may apply." (Good practice to repeat).
+Reminder of how to opt-out (e.g., "Reply STOP to unsubscribe").
+8. Message Samples:
+I have 5 samples already. Remind me to ensure:
+At least one sample clearly includes the brand name (Featherweight.world or Flappy from Featherweight.world).
+At least one sample includes opt-out language (e.g., "Reply STOP to unsubscribe.").
+Sample #5 Welcome to Featherweight.world! I'm Flappy, your Pelican Pal. What's on your mind? is a good candidate for adding the opt-out language.
+9. Campaign Description:
+My current description is: This is so that users of featherweight.world are able to chat back and forth with a built in AI server. It's meant for mental health and wellness.
+Should I refine this to be more descriptive of the messaging campaign? For example: This campaign enables users of featherweight.world to engage in conversational AI chat for mental health and wellness support, receive wellness tips, and get important account updates via SMS.
+10. UI/Website Requirements for me to implement (for featherweight.world sign-up page):
+*   A phone number input field.
+*   A clear, **un-prechecked checkbox** for SMS consent.
+*   The exact Call-to-Action text (as defined in point #1) must be displayed directly next to or clearly associated with this checkbox.
+*   Easily accessible links to the `Privacy Policy` and `Terms of Service` (e.g., in the website footer and/or near the sign-up form).
+Use code with caution.
+11. Privacy Policy on featherweight.world:
+*   Please remind me that the Privacy Policy *must* include a clause like: *"No mobile information will be shared with third parties/affiliates for marketing/promotional purposes. All the above categories exclude text messaging originator opt-in data and consent; this information will not be shared with any third parties."*
+Use code with caution.
+My Action Items after you provide the text:
+I will update the featherweight.world sign-up page with the checkbox and exact consent language you help generate.
+I will ensure the Privacy Policy and Terms of Service are updated and linked.
+I will take a screenshot of the live sign-up page showing the opt-in mechanism and host it publicly.
+Can you generate all the recommended text for these Twilio campaign fields and provide guidance based on these changes? My goal is a successful resubmission.
+Thanks!
