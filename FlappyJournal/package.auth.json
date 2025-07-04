@@ -1,0 +1,28 @@
+{
+  "scripts": {
+    "auth:start": "docker-compose -f docker-compose.auth.yml up -d",
+    "auth:stop": "docker-compose -f docker-compose.auth.yml down",
+    "auth:logs": "docker-compose -f docker-compose.auth.yml logs -f",
+    "auth:init": "tsx auth-service/init-keycloak.ts",
+    "kong:setup": "tsx auth-service/kong/kong-setup.ts setup",
+    "kong:status": "tsx auth-service/kong/kong-setup.ts status",
+    "migrate": "tsx server/migration-runner.ts run",
+    "migrate:status": "tsx server/migration-runner.ts status",
+    "migrate:rollback": "tsx server/migration-runner.ts rollback",
+    "auth:full-setup": "npm run auth:start && sleep 30 && npm run auth:init && npm run kong:setup && npm run migrate"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0",
+    "axios": "^1.7.2",
+    "bcryptjs": "^2.4.3",
+    "speakeasy": "^2.0.0",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/speakeasy": "^2.0.10",
+    "@types/qrcode": "^1.5.5"
+  }
+}

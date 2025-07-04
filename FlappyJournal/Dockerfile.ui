@@ -1,0 +1,17 @@
+# Dockerfile.ui
+# Build the client-side application in a Linux container and extract the static assets
+
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install root-level dependencies without running lifecycle scripts
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
+
+# Install client-specific dependencies without lifecycle scripts
+WORKDIR /app
+# Copy entire repository and install dependencies
+COPY . ./
+# Build both client & server (client build outputs to /app/public)
+RUN npm run build

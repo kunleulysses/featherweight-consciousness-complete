@@ -1,0 +1,3 @@
+nohup: ignoring input
+Demo portal server running on port 5002
+127.0.0.1 - - [03/Jul/2025:05:42:17 +0000] "HEAD / HTTP/1.1" 200 12862 "-" "curl/7.81.0"

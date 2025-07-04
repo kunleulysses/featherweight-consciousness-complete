@@ -1,0 +1,67 @@
+.research-tab {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.research-header {
+  padding: 1.5rem;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.research-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.view-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.view-tab:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.view-tab.active {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.view-tab span {
+  font-size: 1rem;
+}
+
+.research-content {
+  flex: 1;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  overflow: hidden;
+}
+
+.research-content > * {
+  height: 100%;
+}

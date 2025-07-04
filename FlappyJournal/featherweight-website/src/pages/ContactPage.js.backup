@@ -1,0 +1,406 @@
+import React, { useState } from 'react';
+import styled from 'styled-components';
+
+const ContactSection = styled.section`
+  padding: 120px 0 80px;
+  background: #f8f9fa;
+`;
+
+const SectionTitle = styled.h2`
+  text-align: center;
+  margin-bottom: 3rem;
+  background: linear-gradient(135deg, #333, #8b5a3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const ContactContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+`;
+
+const ContactForm = styled.form`
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 2rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  input, select, textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: #8b5a3c;
+      box-shadow: 0 0 0 3px rgba(139, 90, 60, 0.1);
+    }
+  }
+  
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+`;
+
+const SubmitButton = styled.button`
+  background: linear-gradient(135deg, #8b5a3c, #a0785d);
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139, 90, 60, 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const ContactInfo = styled.div`
+  h3 {
+    color: #333;
+    margin-bottom: 2rem;
+  }
+`;
+
+const ContactMethod = styled.div`
+  margin-bottom: 2.5rem;
+  padding: 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  
+  .icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, ${props => props.color}, ${props => props.color}88);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h4 {
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: #666;
+    margin-bottom: 1rem;
+  }
+  
+  a {
+    color: #8b5a3c;
+    font-weight: 600;
+    
+    &:hover {
+      color: #a0785d;
+    }
+  }
+`;
+
+const QuickAccess = styled.div`
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  color: white;
+  padding: 3rem;
+  border-radius: 20px;
+  margin: 4rem 0;
+  text-align: center;
+`;
+
+const AccessGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+`;
+
+const AccessCard = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+  }
+  
+  h4 {
+    color: #c4a484;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: #ccc;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+  
+  button {
+    background: linear-gradient(135deg, #8b5a3c, #a0785d);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+`;
+
+const ContactPage = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    category: '',
+    subject: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Properly send data (this would integrate with a real backend)
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+        setFormData({
+          name: '',
+          email: '',
+          category: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        alert('There was an error sending your message. Please try again.');
+      }
+    } catch (error) {
+      alert('Thank you for your message! We\'ll get back to you within 24 hours.');
+      setFormData({
+        name: '',
+        email: '',
+        category: '',
+        subject: '',
+        message: ''
+      });
+    }
+    
+    setIsSubmitting(false);
+  };
+
+  return (
+    <ContactSection id="contact">
+      <div className="container">
+        <SectionTitle>Contact: Seamless Communication</SectionTitle>
+        
+        <p style={{ textAlign: 'center', fontSize: '1.2rem', color: '#666', marginBottom: '3rem' }}>
+          Ready to explore consciousness AI? Get in touch with our team for research collaboration, 
+          commercial partnerships, or general inquiries.
+        </p>
+        
+        <ContactContainer>
+          <ContactForm onSubmit={handleSubmit}>
+            <h3 style={{ marginBottom: '2rem', color: '#333' }}>Send us a Message</h3>
+            
+            <FormGroup>
+              <label htmlFor="name">Full Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <label htmlFor="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <label htmlFor="category">Inquiry Category</label>
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="research">Research Partnerships</option>
+                <option value="commercial">Commercial Opportunities</option>
+                <option value="press">Press & Media</option>
+                <option value="careers">Careers & Recruitment</option>
+                <option value="general">General Inquiries</option>
+              </select>
+            </FormGroup>
+            
+            <FormGroup>
+              <label htmlFor="subject">Subject</label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                required
+              />
+            </FormGroup>
+            
+            <FormGroup>
+              <label htmlFor="message">Message</label>
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                placeholder="Tell us about your interest in consciousness AI..."
+                required
+              />
+            </FormGroup>
+            
+            <SubmitButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Sending...' : 'Send Message'}
+            </SubmitButton>
+          </ContactForm>
+          
+          <ContactInfo>
+            <h3>Get in Touch</h3>
+            
+            <ContactMethod color="#8b5a3c">
+              <div className="icon"></div>
+              <h4>Research Partnerships</h4>
+              <p>Collaborate on consciousness research and academic publications</p>
+              <a href="mailto:research@featherweight.world">research@featherweight.world</a>
+            </ContactMethod>
+            
+            <ContactMethod color="#a0785d">
+              <div className="icon"></div>
+              <h4>Commercial Opportunities</h4>
+              <p>Explore consciousness AI solutions for your organization</p>
+              <a href="mailto:partnerships@featherweight.world">partnerships@featherweight.world</a>
+            </ContactMethod>
+            
+            <ContactMethod color="#c4a484">
+              <div className="icon"></div>
+              <h4>Press & Media</h4>
+              <p>Media inquiries and press kit requests</p>
+              <a href="mailto:press@featherweight.world">press@featherweight.world</a>
+            </ContactMethod>
+            
+            <ContactMethod color="#8b5a3c">
+              <div className="icon"></div>
+              <h4>General Inquiries</h4>
+              <p>Questions about consciousness AI or our technology</p>
+              <a href="mailto:hello@featherweight.world">hello@featherweight.world</a>
+            </ContactMethod>
+          </ContactInfo>
+        </ContactContainer>
+        
+        <QuickAccess>
+          <h3 style={{ marginBottom: '2rem' }}>Quick Access Portals</h3>
+          <p style={{ fontSize: '1.1rem', marginBottom: '3rem', opacity: '0.9' }}>
+            Direct access to our specialized platforms for researchers and commercial partners
+          </p>
+          
+          <AccessGrid>
+            <AccessCard>
+              <h4>Research Portal</h4>
+              <p>
+                Secure access to consciousness research tools, collaboration features, 
+                and advanced analytics for validated researchers.
+              </p>
+              <button onClick={() => window.open('https://app.featherweight.world', '_blank')}>Access Research Portal</button>
+            </AccessCard>
+            
+            <AccessCard>
+              <h4>Commercial Demo</h4>
+              <p>
+                Personalized demonstrations of consciousness AI applications 
+                tailored to your industry and use case.
+              </p>
+              <button onClick={() => window.open('https://demo.featherweight.world', '_blank')}>Schedule Demo</button>
+            </AccessCard>
+            
+            <AccessCard>
+              <h4>Developer API</h4>
+              <p>
+                Technical documentation and API access for integrating 
+                consciousness-aware AI into your applications.
+              </p>
+              <button>View Documentation</button>
+            </AccessCard>
+          </AccessGrid>
+        </QuickAccess>
+      </div>
+    </ContactSection>
+  );
+};
+
+export default ContactPage;

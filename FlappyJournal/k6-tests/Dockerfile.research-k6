@@ -1,0 +1,56 @@
+FROM grafana/k6:latest
+
+# Set working directory
+WORKDIR /app
+
+# Create output directories for research validation
+RUN mkdir -p /artifacts/research-reports \
+             /artifacts/consciousness-metrics \
+             /artifacts/validation-logs \
+             /artifacts/journal-ready-data
+
+# Install additional tools for research validation
+USER root
+RUN apk add --no-cache \
+    curl \
+    jq \
+    bash \
+    netcat-openbsd \
+    python3 \
+    py3-pip
+
+# Install Python packages for research data analysis
+RUN pip3 install --no-cache-dir \
+    pandas \
+    numpy \
+    matplotlib \
+    seaborn \
+    scipy
+
+# Switch back to k6 user
+USER k6
+
+# Copy research-focused test scripts
+COPY research-platform-load-test.js ./
+COPY *.js ./
+COPY scripts/ ./scripts/ 2>/dev/null || true
+
+# Set environment variables for research platform
+ENV K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+ENV K6_WEB_DASHBOARD=true
+ENV K6_WEB_DASHBOARD_HOST=0.0.0.0
+ENV K6_WEB_DASHBOARD_PORT=5665
+ENV RESEARCH_MODE=true
+
+# Labels for research validation
+LABEL version="1.0"
+LABEL description="Research Platform Load Testing for Consciousness Technology Validation"
+LABEL maintainer="Featherweight Research Team"
+LABEL validation.ready="true"
+
+# Default command - run research platform validation
+CMD ["k6", "run", \
+     "--out", "prometheus=http://prometheus:9090/api/v1/write", \
+     "--summary-export", "/artifacts/research-reports/research-validation-summary.json", \
+     "--summary-trend-stats", "avg,min,med,max,p(90),p(95),p(99)", \
+     "research-platform-load-test.js"]

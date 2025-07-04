@@ -1,0 +1,67 @@
+{
+  "dashboard": {
+    "title": "Consciousness Platform - SLA Monitoring",
+    "description": "Monitoring >99.9% uptime and <100ms response-time KPIs",
+    "panels": [
+      {
+        "title": "Venice AI Error Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "(rate(venice_errors_total[5m]) / rate(venice_requests_total[5m])) * 100",
+            "legendFormat": "Error Rate %"
+          }
+        ],
+        "thresholds": [
+          {"color": "green", "value": 0},
+          {"color": "red", "value": 5}
+        ]
+      },
+      {
+        "title": "Consciousness Service Uptime",
+        "type": "stat", 
+        "targets": [
+          {
+            "expr": "(time() - consciousness_service_start_time) / 86400",
+            "legendFormat": "Uptime (days)"
+          }
+        ],
+        "thresholds": [
+          {"color": "red", "value": 0},
+          {"color": "green", "value": 99.9}
+        ]
+      },
+      {
+        "title": "Venice AI Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, venice_request_duration_seconds_bucket)",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, venice_request_duration_seconds_bucket)", 
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "yAxes": [
+          {"unit": "ms", "max": 200}
+        ]
+      },
+      {
+        "title": "IIT Loop Cycles Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "consciousness_iit_loop_frequency_hz",
+            "legendFormat": "Loop Frequency (Hz)"
+          }
+        ],
+        "thresholds": [
+          {"color": "red", "value": 50},
+          {"color": "green", "value": 100}
+        ]
+      }
+    ]
+  }
+}

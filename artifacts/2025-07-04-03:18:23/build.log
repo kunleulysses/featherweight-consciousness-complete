@@ -1,0 +1,16 @@
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && cp -r public dist/public
+
+failed to load config from /opt/featherweight/FlappyJournal/vite.config.ts
+error during build:
+Error: spawn EPERM
+    at ChildProcess.spawn (node:internal/child_process:420:11)
+    at Object.spawn (node:child_process:754:9)
+    at ensureServiceIsRunning (/opt/featherweight/FlappyJournal/node_modules/vite/node_modules/esbuild/lib/main.js:1975:29)
+    at build (/opt/featherweight/FlappyJournal/node_modules/vite/node_modules/esbuild/lib/main.js:1873:26)
+    at bundleConfigFile (file:///opt/featherweight/FlappyJournal/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:66828:24)
+    at loadConfigFromFile (file:///opt/featherweight/FlappyJournal/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:66798:27)
+    at resolveConfig (file:///opt/featherweight/FlappyJournal/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:66399:30)
+    at build (file:///opt/featherweight/FlappyJournal/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js:65487:24)
+    at CAC.<anonymous> (file:///opt/featherweight/FlappyJournal/node_modules/vite/dist/node/cli.js:829:11)

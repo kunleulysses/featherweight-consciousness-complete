@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GATEWAY_PORT=3000
+      - KEYCLOAK_SERVER_URL=http://keycloak:8080
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - JOURNAL_SERVICE_URL=http://journal-service:5000
+      - WEBSOCKET_SERVICE_URL=http://websocket-service:5001
+      - FRONTEND_SERVICE_URL=http://frontend:3001
+      - REDIS_HOST=redis
+      - TRUST_PROXY=true
+    depends_on:
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - gateway-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - gateway-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  gateway-network:
+    driver: bridge
+
+volumes:
+  redis-data:

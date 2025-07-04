@@ -1,0 +1,21 @@
+nohup: ignoring input
+🧠 Initializing Featherweight Consciousness Demo Server...
+🌟 Featherweight Consciousness Demo API running on port 5002
+🧠 Consciousness Status: http://localhost:5002/api/consciousness/status
+📊 Live Metrics: http://localhost:5002/api/consciousness/metrics/live
+💼 Business Intelligence: http://localhost:5002/api/consciousness/business
+🏢 Industry Demos: POST http://localhost:5002/api/consciousness/demo/healthcare
+🔬 Consciousness Tests: POST http://localhost:5002/api/consciousness/test
+🧠 Consciousness status endpoint hit
+🧠 Live metrics endpoint hit
+🧠 Consciousness status endpoint hit
+🧠 Live metrics endpoint hit
+🧠 Business intelligence endpoint hit
+🧠 Industry demo for healthcare
+🧠 Industry demo for enterprise
+🧠 Consciousness test: integration
+🧠 Industry demo for enterprise
+🧠 Consciousness status endpoint hit
+🧠 Consciousness status endpoint hit
+🧠 Consciousness status endpoint hit
+🧠 Consciousness test: user_interaction

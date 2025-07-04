@@ -1,0 +1,233 @@
+version: '3.8'
+
+services:
+  # Test PostgreSQL Database (isolated)
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: featherweight-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: flappyjournal_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ../FlappyJournal/deploy/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d flappyjournal_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Test Redis (isolated)
+  redis-test:
+    image: redis:7-alpine
+    container_name: featherweight-redis-test
+    command: redis-server --appendonly yes --requirepass test_redis_password
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    volumes:
+      - redis_test_data:/data
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a test_redis_password ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test Auth Service
+  auth-service-test:
+    build:
+      context: ../FlappyJournal/auth-service
+      dockerfile: Dockerfile
+    container_name: featherweight-auth-test
+    restart: unless-stopped
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+      - PORT=4011
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=flappyjournal_test
+      - DB_USER=test_user
+      - DB_PASSWORD=test_password
+      - JWT_SECRET=test_jwt_secret_32_chars_minimum_length
+      - OIDC_CLIENT_ID=test_client_id
+      - OIDC_CLIENT_SECRET=test_client_secret
+      - OIDC_ISSUER=http://localhost:8080/auth/realms/featherweight
+    ports:
+      - "4011:4011"
+    env_file:
+      - .env.test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4011/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - test-network
+
+  # Test Consciousness Backend (with 100Hz loop)
+  consciousness-backend-test:
+    build:
+      context: ../FlappyJournal/
+      dockerfile: Dockerfile
+    container_name: featherweight-consciousness-test
+    restart: unless-stopped
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      auth-service-test:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+      - GRPC_PORT=50052
+      - HTTP_PORT=4013
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=flappyjournal_test
+      - DB_USER=test_user
+      - DB_PASSWORD=test_password
+      - AUTH_SERVICE_URL=http://auth-service-test:4011
+      - CONSCIOUSNESS_METRICS_INTERVAL=10  # 100Hz = 10ms interval
+      - CONSCIOUSNESS_INSIGHT_GENERATION_FREQUENCY=100
+      - AUTONOMOUS_THOUGHTS_INTERVAL=1000
+    ports:
+      - "50052:50052"
+      - "4013:4013"
+    env_file:
+      - .env.test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4013/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - test-network
+
+  # Test Chat Orchestrator
+  chat-orchestrator-test:
+    build:
+      context: ../FlappyJournal/chat-orchestrator
+      dockerfile: Dockerfile
+    container_name: featherweight-chat-test
+    restart: unless-stopped
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      auth-service-test:
+        condition: service_healthy
+      consciousness-backend-test:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+      - PORT=4012
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=flappyjournal_test
+      - DB_USER=test_user
+      - DB_PASSWORD=test_password
+      - AUTH_SERVICE_URL=http://auth-service-test:4011
+      - CONSCIOUSNESS_BACKEND_URL=http://consciousness-backend-test:4013
+      - CONSCIOUSNESS_GRPC_URL=consciousness-backend-test:50052
+    ports:
+      - "4012:4012"
+    env_file:
+      - .env.test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - test-network
+
+  # Test API Gateway
+  api-gateway-test:
+    build:
+      context: ../FlappyJournal/api-gateway
+      dockerfile: Dockerfile
+    container_name: featherweight-api-gateway-test
+    restart: unless-stopped
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      auth-service-test:
+        condition: service_healthy
+      consciousness-backend-test:
+        condition: service_healthy
+      chat-orchestrator-test:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+      - PORT=4010
+      - AUTH_SERVICE_URL=http://auth-service-test:4011
+      - CONSCIOUSNESS_BACKEND_URL=http://consciousness-backend-test:4013
+      - CHAT_ORCHESTRATOR_URL=http://chat-orchestrator-test:4012
+      - REDIS_URL=redis://:test_redis_password@redis-test:6379
+    ports:
+      - "4010:4010"
+    env_file:
+      - .env.test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - test-network
+
+  # Test WebSocket Server
+  websocket-monitor-test:
+    build:
+      context: ../FlappyJournal/
+      dockerfile: Dockerfile
+    container_name: featherweight-ws-test
+    restart: unless-stopped
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      auth-service-test:
+        condition: service_healthy
+      consciousness-backend-test:
+        condition: service_healthy
+      chat-orchestrator-test:
+        condition: service_healthy
+      api-gateway-test:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=test
+      - PORT=4014
+      - WS_PORT=4015
+      - AUTH_SERVICE_URL=http://auth-service-test:4011
+      - API_GATEWAY_URL=http://api-gateway-test:4010
+      - CHAT_ORCHESTRATOR_URL=http://chat-orchestrator-test:4012
+      - CONSCIOUSNESS_BACKEND_URL=http://consciousness-backend-test:4013
+      - REDIS_URL=redis://:test_redis_password@redis-test:6379
+    ports:
+      - "4014:4014"
+      - "4015:4015"
+    env_file:
+      - .env.test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4014/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - test-network
+
+volumes:
+  postgres_test_data:
+  redis_test_data:
+
+networks:
+  test-network:
+    driver: bridge

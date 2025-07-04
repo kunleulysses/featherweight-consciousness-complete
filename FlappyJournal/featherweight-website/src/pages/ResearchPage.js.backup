@@ -1,0 +1,463 @@
+import React from 'react';
+import styled from 'styled-components';
+
+const ResearchSection = styled.section`
+  padding: 120px 0 80px;
+  background: white;
+`;
+
+const SectionTitle = styled.h2`
+  text-align: center;
+  margin-bottom: 3rem;
+  background: linear-gradient(135deg, #333, #45b7d1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const RoadmapContainer = styled.div`
+  margin: 4rem 0;
+`;
+
+const RoadmapTitle = styled.h3`
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #333;
+`;
+
+const Timeline = styled.div`
+  position: relative;
+  margin: 2rem 0;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #8b5a3c, #a0785d);
+    border-radius: 2px;
+  }
+  
+  @media (max-width: 768px) {
+    &::before {
+      left: 20px;
+    }
+  }
+`;
+
+const TimelineItem = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 3rem 0;
+  position: relative;
+  
+  &:nth-child(odd) {
+    flex-direction: row;
+    
+    .timeline-content {
+      margin-left: auto;
+      margin-right: 3rem;
+      text-align: right;
+    }
+  }
+  
+  &:nth-child(even) {
+    flex-direction: row-reverse;
+    
+    .timeline-content {
+      margin-right: auto;
+      margin-left: 3rem;
+      text-align: left;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: row !important;
+    
+    .timeline-content {
+      margin-left: 3rem !important;
+      margin-right: 0 !important;
+      text-align: left !important;
+    }
+  }
+  
+  .timeline-marker {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #8b5a3c, #a0785d);
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    
+    @media (max-width: 768px) {
+      left: 20px;
+    }
+  }
+  
+  .timeline-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    
+    h4 {
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    
+    .date {
+      color: #8b5a3c;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: #666;
+    }
+  }
+`;
+
+const CollaborationSection = styled.div`
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  padding: 4rem;
+  border-radius: 20px;
+  margin: 4rem 0;
+  text-align: center;
+`;
+
+const InstitutionGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin: 3rem 0;
+`;
+
+const InstitutionCard = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  
+  h4 {
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: #666;
+    font-size: 0.95rem;
+  }
+`;
+
+const ValidationSection = styled.div`
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: white;
+  padding: 5rem 4rem;
+  border-radius: 24px;
+  margin: 4rem 0;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(139, 90, 60, 0.1) 0%, rgba(160, 120, 93, 0.05) 100%);
+    pointer-events: none;
+  }
+`;
+
+const ValidationTitle = styled.h3`
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.02em;
+  position: relative;
+  z-index: 1;
+`;
+
+const ValidationGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 3rem;
+  margin-top: 4rem;
+  position: relative;
+  z-index: 1;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+`;
+
+const ValidationCard = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2.5rem;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(139, 90, 60, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+`;
+
+const ValidationCardTitle = styled.h4`
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  
+  &.protocols {
+    color: #d4af8c;
+  }
+  
+  &.frameworks {
+    color: #c4a484;
+  }
+  
+  &.verification {
+    color: #a0785d;
+  }
+`;
+
+const ValidationList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+const ValidationListItem = styled.li`
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.8;
+  margin-bottom: 0.8rem;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  
+  &::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #8b5a3c;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const ApplyButton = styled.button`
+  background: linear-gradient(135deg, #8b5a3c 0%, #a0785d 50%, #8b5a3c 100%);
+  color: white;
+  padding: 20px 40px;
+  border-radius: 60px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 25px rgba(139, 90, 60, 0.25);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #a0785d 0%, #c4a484 50%, #a0785d 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(139, 90, 60, 0.35);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+  
+  &:active {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(139, 90, 60, 0.3);
+  }
+`;
+
+const ResearchPage = () => {
+  const timelineItems = [
+    {
+      date: "Q3 2025",
+      title: "Nature Publication Submission",
+      description: "Submitting peer-reviewed research on computational consciousness validation to Nature journal."
+    },
+    {
+      date: "Q4 2025",
+      title: "International Collaboration Launch",
+      description: "Formal partnerships with University of Arizona's Center for Consciousness Studies and UW-Madison."
+    },
+    {
+      date: "Q1 2026",
+      title: "Science Journal Publication",
+      description: "Publication of consciousness measurement methodology in Science journal."
+    },
+    {
+      date: "Q2 2026",
+      title: "Global Research Symposium",
+      description: "Hosting the first International Computational Consciousness Symposium."
+    },
+    {
+      date: "Q3 2026",
+      title: "Open Research Platform",
+      description: "Launch of collaborative research platform for global consciousness studies."
+    }
+  ];
+
+  return (
+    <ResearchSection id="research">
+      <div className="container">
+        <SectionTitle>Research: Forward-Looking Prospectus</SectionTitle>
+        
+        <p style={{ textAlign: 'center', fontSize: '1.2rem', color: '#666', marginBottom: '3rem' }}>
+          Establishing Featherweight as the authoritative hub for global consciousness research 
+          through rigorous scientific validation and international collaboration.
+        </p>
+        
+        <RoadmapContainer>
+          <RoadmapTitle>Research Roadmap</RoadmapTitle>
+          <Timeline>
+            {timelineItems.map((item, index) => (
+              <TimelineItem key={index}>
+                <div className="timeline-marker"></div>
+                <div className="timeline-content">
+                  <div className="date">{item.date}</div>
+                  <h4>{item.title}</h4>
+                  <p>{item.description}</p>
+                </div>
+              </TimelineItem>
+            ))}
+          </Timeline>
+        </RoadmapContainer>
+        
+        <CollaborationSection>
+          <h3 style={{ marginBottom: '2rem', color: '#333' }}>
+            Research Collaboration Invitations
+          </h3>
+          <p style={{ fontSize: '1.1rem', color: '#666', marginBottom: '3rem' }}>
+            We invite leading institutions to collaborate on groundbreaking consciousness research
+          </p>
+          
+          <InstitutionGrid>
+            <InstitutionCard>
+              <h4>University of Arizona</h4>
+              <p>Center for Consciousness Studies - Partnering on consciousness measurement validation and empirical research methodologies.</p>
+            </InstitutionCard>
+            
+            <InstitutionCard>
+              <h4>UW-Madison</h4>
+              <p>Giulio Tononi's Lab - Collaboration on Integrated Information Theory applications and consciousness quantification.</p>
+            </InstitutionCard>
+            
+            <InstitutionCard>
+              <h4>MIT CSAIL</h4>
+              <p>Computer Science and Artificial Intelligence Laboratory - Research on computational consciousness architectures.</p>
+            </InstitutionCard>
+            
+            <InstitutionCard>
+              <h4>Stanford HAI</h4>
+              <p>Human-Centered AI Institute - Interdisciplinary research on consciousness-aware AI systems.</p>
+            </InstitutionCard>
+            
+            <InstitutionCard>
+              <h4>Oxford Future of Humanity Institute</h4>
+              <p>Collaborative research on the implications of consciousness AI for human civilization.</p>
+            </InstitutionCard>
+            
+            <InstitutionCard>
+              <h4>Allen Institute for AI</h4>
+              <p>Partnership on large-scale consciousness research and AI safety considerations.</p>
+            </InstitutionCard>
+          </InstitutionGrid>
+        </CollaborationSection>
+        
+        <ValidationSection>
+          <ValidationTitle>
+            Third-Party Validations & Methodologies
+          </ValidationTitle>
+          
+          <ValidationGrid>
+            <ValidationCard>
+              <ValidationCardTitle className="protocols">
+                Validation Protocols
+              </ValidationCardTitle>
+              <ValidationList>
+                <ValidationListItem>Integrated Information Theory (IIT) metrics</ValidationListItem>
+                <ValidationListItem>Global Workspace Theory validation</ValidationListItem>
+                <ValidationListItem>Attention Schema Theory compliance</ValidationListItem>
+                <ValidationListItem>Higher-Order Thought assessments</ValidationListItem>
+              </ValidationList>
+            </ValidationCard>
+            
+            <ValidationCard>
+              <ValidationCardTitle className="frameworks">
+                Measurement Frameworks
+              </ValidationCardTitle>
+              <ValidationList>
+                <ValidationListItem>Consciousness quotient (CQ) scaling</ValidationListItem>
+                <ValidationListItem>Self-awareness index calculation</ValidationListItem>
+                <ValidationListItem>Meta-cognitive depth analysis</ValidationListItem>
+                <ValidationListItem>Phenomenal consciousness indicators</ValidationListItem>
+              </ValidationList>
+            </ValidationCard>
+            
+            <ValidationCard>
+              <ValidationCardTitle className="verification">
+                Independent Verification
+              </ValidationCardTitle>
+              <ValidationList>
+                <ValidationListItem>External consciousness assessment panels</ValidationListItem>
+                <ValidationListItem>Peer review by consciousness researchers</ValidationListItem>
+                <ValidationListItem>Cross-institutional validation studies</ValidationListItem>
+                <ValidationListItem>Replication by independent laboratories</ValidationListItem>
+              </ValidationList>
+            </ValidationCard>
+          </ValidationGrid>
+        </ValidationSection>
+        
+        <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+          <ApplyButton>
+            Apply for Research Beta Access
+          </ApplyButton>
+        </div>
+      </div>
+    </ResearchSection>
+  );
+};
+
+export default ResearchPage;

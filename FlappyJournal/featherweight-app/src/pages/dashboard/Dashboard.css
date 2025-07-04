@@ -1,0 +1,269 @@
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-header p {
+  color: #666;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.stat-header h3 {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.stat-subtitle {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* Quick Actions */
+.quick-actions {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.quick-actions h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-button:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.action-icon {
+  font-size: 1.5rem;
+}
+
+/* Dashboard Content */
+.dashboard-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.content-section {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.content-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Projects */
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.project-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.project-item:hover {
+  background: #f5f5f5;
+}
+
+.project-info h4 {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.project-info p {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.project-meta {
+  text-align: right;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.date {
+  display: block;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* Activities */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.activity-icon {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.activity-content p {
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.activity-meta {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+/* Utilities */
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+.primary-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.primary-button:hover {
+  background: #0056b3;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .stat-card,
+  .quick-actions,
+  .content-section {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  
+  .stat-header h3,
+  .dashboard-header p {
+    color: #ccc;
+  }
+  
+  .project-item,
+  .action-button {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  
+  .project-item:hover,
+  .action-button:hover {
+    background: #2a2a2a;
+  }
+  
+  .activity-icon,
+  .role-badge {
+    background: #2a2a2a;
+  }
+}

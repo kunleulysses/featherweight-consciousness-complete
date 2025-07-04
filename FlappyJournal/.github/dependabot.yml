@@ -1,0 +1,41 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "featherweight-team"
+    assignees:
+      - "featherweight-team"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    open-pull-requests-limit: 10
+    
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "featherweight-team"
+    assignees:
+      - "featherweight-team"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "featherweight-team"
+    assignees:
+      - "featherweight-team"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

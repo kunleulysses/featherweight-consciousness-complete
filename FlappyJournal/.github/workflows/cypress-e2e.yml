@@ -1,0 +1,75 @@
+name: Cypress E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Create artifacts directory
+      run: |
+        mkdir -p ./artifacts/cypress/videos
+        mkdir -p ./artifacts/cypress/screenshots  
+        mkdir -p ./artifacts/junit
+        
+    - name: Start application services
+      run: |
+        # Start your application here
+        # This is a placeholder - adjust based on your setup
+        npm start &
+        sleep 30
+        
+    - name: Run Cypress E2E tests
+      uses: cypress-io/github-action@v6
+      with:
+        config-file: cypress.junit.config.js
+        spec: cypress/e2e/comprehensive-e2e-suite.cy.js
+        wait-on: 'http://localhost:4000'
+        wait-on-timeout: 120
+        browser: chrome
+        headless: true
+        record: false
+      env:
+        CYPRESS_baseUrl: http://localhost:4000
+        CYPRESS_defaultCommandTimeout: 60000
+        CYPRESS_requestTimeout: 60000
+        CYPRESS_responseTimeout: 60000
+        CYPRESS_pageLoadTimeout: 60000
+        
+    - name: Upload Cypress artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cypress-artifacts
+        path: |
+          artifacts/cypress/videos/
+          artifacts/cypress/screenshots/
+          artifacts/junit/
+        retention-days: 30
+        
+    - name: Publish Test Results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Cypress E2E Test Results
+        path: artifacts/junit/*.xml
+        reporter: java-junit
+        fail-on-error: true

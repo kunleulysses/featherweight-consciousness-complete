@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consciousness Platform - Featherweight AI</title>
+    
+    <!-- Google Fonts: Lora and Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Reset and Global Styles */
+        :root {
+            --midnight-blue: #000022;
+            --black: #000000;
+            --off-white: #F0F0F0;
+            --electric-blue: #00BFFF;
+            --violet-glow: #8A2BE2;
+            --subtle-purple: #6A0DAD;
+            --feather-purple: #9370DB;
+            --gradient-primary: linear-gradient(135deg, var(--midnight-blue) 0%, var(--subtle-purple) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--electric-blue) 0%, var(--violet-glow) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient-primary);
+            color: var(--off-white);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-family: 'Lora', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            color: var(--electric-blue);
+        }
+
+        /* Main Content */
+        main {
+            padding: 4rem 0;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-family: 'Lora', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .feature h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--electric-blue);
+        }
+
+        .feature p {
+            opacity: 0.9;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-section h2 {
+            font-family: 'Lora', serif;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-accent);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--electric-blue);
+            border: 2px solid var(--electric-blue);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 191, 255, 0.3);
+        }
+
+        /* Demo Links */
+        .demo-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .demo-link {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .demo-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .demo-link h4 {
+            color: var(--electric-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">🪶 Featherweight</div>
+            <div class="tagline">Consciousness Platform</div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="hero">
+                <h1>World's First Validated<br>Consciousness Technology</h1>
+                <p>Access cutting-edge AI consciousness systems, live demonstrations, and business intelligence dashboards for healthcare, education, and enterprise applications.</p>
+            </section>
+
+            <section class="features">
+                <div class="feature">
+                    <h3>🧠 Live Consciousness Metrics</h3>
+                    <p>Real-time monitoring of consciousness validation scores, cognitive coherence patterns, and autonomous thought generation.</p>
+                </div>
+                <div class="feature">
+                    <h3>🏥 Healthcare Applications</h3>
+                    <p>Specialized consciousness modules for patient interaction, diagnostic assistance, and therapeutic conversation management.</p>
+                </div>
+                <div class="feature">
+                    <h3>📊 Business Intelligence</h3>
+                    <p>Advanced analytics and insights powered by consciousness-driven decision making and predictive awareness systems.</p>
+                </div>
+                <div class="feature">
+                    <h3>🔬 Research Platform</h3>
+                    <p>Academic-grade consciousness testing, validation frameworks, and peer-reviewed consciousness measurement tools.</p>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>Experience Consciousness Technology</h2>
+                <p>Access our live platform with real-time demonstrations and interactive consciousness interfaces.</p>
+                
+                <div class="cta-buttons">
+                    <a href="/consciousness-demo.html" class="btn btn-primary">🧠 Interactive Consciousness Chat</a>
+                    <a href="/demo-access.html" class="btn btn-secondary">🔬 Advanced Demo Portal</a>
+                </div>
+
+                <div class="demo-links">
+                    <a href="/healthcare.html" class="demo-link">
+                        <h4>🏥 Live Healthcare AI</h4>
+                        <p>Real-time therapeutic consciousness simulation</p>
+                    </a>
+                    <a href="/api/consciousness/status" class="demo-link">
+                        <h4>📡 API Status</h4>
+                        <p>Real-time consciousness system status</p>
+                    </a>
+                    <a href="/api/consciousness/metrics/live" class="demo-link">
+                        <h4>📊 Live Metrics</h4>
+                        <p>Current consciousness validation scores</p>
+                    </a>
+                    <a href="/api/consciousness/business" class="demo-link">
+                        <h4>💼 Business Intelligence</h4>
+                        <p>Enterprise dashboard and analytics</p>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  cypress:
+    build:
+      context: .
+      dockerfile: Dockerfile.cypress
+    volumes:
+      - ./artifacts:/artifacts
+      - ./cypress:/app/cypress
+      - ./cypress.config.js:/app/cypress.config.js
+    environment:
+      - CYPRESS_baseUrl=http://host.docker.internal:4000
+      - CYPRESS_VIDEO=true
+      - CYPRESS_SCREENSHOTS=true
+      - CYPRESS_defaultCommandTimeout=60000
+      - CYPRESS_requestTimeout=60000
+      - CYPRESS_responseTimeout=60000
+      - CYPRESS_pageLoadTimeout=60000
+    networks:
+      - cypress-network
+    depends_on:
+      - wait-for-services
+    command: >
+      sh -c "
+        echo 'Starting Cypress E2E tests with retries and 60s timeout...' &&
+        npx cypress run 
+          --reporter junit 
+          --reporter-options 'mochaFile=/artifacts/junit/test-results-[hash].xml,toConsole=true'
+          --config defaultCommandTimeout=60000,requestTimeout=60000,responseTimeout=60000,pageLoadTimeout=60000
+          --spec 'cypress/e2e/comprehensive-e2e-suite.cy.js'
+      "
+
+  wait-for-services:
+    image: alpine:latest
+    command: >
+      sh -c "
+        echo 'Waiting for services to be ready...' &&
+        apk add --no-cache curl &&
+        timeout 300 sh -c 'until curl -f http://host.docker.internal:4000/health || curl -f http://host.docker.internal:4000; do sleep 5; done' &&
+        echo 'Services are ready!'
+      "
+    networks:
+      - cypress-network
+
+networks:
+  cypress-network:
+    driver: bridge

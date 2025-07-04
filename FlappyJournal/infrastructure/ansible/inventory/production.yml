@@ -1,0 +1,44 @@
+---
+all:
+  children:
+    aws:
+      hosts:
+        localhost:
+          ansible_connection: local
+          ansible_python_interpreter: "{{ ansible_playbook_python }}"
+      vars:
+        environment: production
+        aws_region: us-east-1
+        project_name: flappyjournal
+        desired_count: 3
+        health_check_url: "https://flappyjournal.com/api/health"
+        
+        # ECS Configuration
+        fargate_cpu: 1024
+        fargate_memory: 2048
+        
+        # Auto Scaling
+        min_capacity: 2
+        max_capacity: 20
+        
+        # Monitoring
+        log_retention_days: 30
+        enable_detailed_monitoring: true
+        
+        # Networking
+        vpc_cidr: "10.0.0.0/16"
+        public_subnet_cidrs:
+          - "10.0.1.0/24"
+          - "10.0.2.0/24"
+          - "10.0.3.0/24"
+        private_subnet_cidrs:
+          - "10.0.10.0/24"
+          - "10.0.20.0/24"
+          - "10.0.30.0/24"
+          
+        # Security
+        enable_waf: true
+        enable_shield: true
+        
+        # Backup
+        backup_retention_days: 90

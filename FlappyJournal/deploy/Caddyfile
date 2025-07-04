@@ -1,0 +1,44 @@
+{
+    # Global options
+    auto_https off
+    admin off
+}
+
+# Main site - routes to API Gateway
+{$DOMAIN:localhost} {
+    # API Gateway (main HTTP traffic)
+    reverse_proxy api-gateway:4000
+    
+    # Health check endpoint
+    handle /health {
+        respond "OK" 200
+    }
+    
+    # Enable logging
+    log {
+        output stdout
+        format json
+    }
+}
+
+# WebSocket endpoint - routes to Chat Orchestrator
+{$DOMAIN:localhost}/ws* {
+    reverse_proxy chat-orchestrator:4002
+    
+    # Enable logging
+    log {
+        output stdout
+        format json
+    }
+}
+
+# Chat API endpoint - routes to Chat Orchestrator
+{$DOMAIN:localhost}/api/chat* {
+    reverse_proxy chat-orchestrator:4002
+    
+    # Enable logging
+    log {
+        output stdout
+        format json
+    }
+}

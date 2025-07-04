@@ -1,0 +1,30 @@
+FROM cypress/included:latest
+
+# Set working directory
+WORKDIR /app
+
+# Create artifacts directory
+RUN mkdir -p /artifacts/cypress/videos /artifacts/cypress/screenshots /artifacts/junit
+
+# Install additional dependencies for JUnit reporting
+RUN npm install -g mocha-junit-reporter
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy Cypress configuration and tests
+COPY cypress.config.js ./
+COPY cypress/ ./cypress/
+
+# Set environment variables
+ENV CYPRESS_baseUrl=http://host.docker.internal:4000
+ENV CYPRESS_video=true
+ENV CYPRESS_screenshots=true
+ENV CYPRESS_videosFolder=/artifacts/cypress/videos
+ENV CYPRESS_screenshotsFolder=/artifacts/cypress/screenshots
+
+# Set default command with retries and timeout
+CMD ["npx", "cypress", "run", "--reporter", "junit", "--reporter-options", "mochaFile=/artifacts/junit/test-results-[hash].xml,toConsole=true"]

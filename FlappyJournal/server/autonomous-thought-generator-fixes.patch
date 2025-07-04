@@ -1,0 +1,83 @@
+--- autonomous-thought-generator.ts.orig
++++ autonomous-thought-generator.ts
+@@ -74,8 +74,14 @@
+     
+     constructor(veniceAI: VeniceAI, memoryService: UnifiedMemorySystem) {
+         this.veniceAI = veniceAI;
+         this.memoryService = memoryService;
++        
++        // Validate dependencies
++        if (!this.veniceAI) {
++            throw new Error('VeniceAI instance is required for AutonomousThoughtGenerator');
++        }
++        if (!this.memoryService) {
++            throw new Error('UnifiedMemorySystem instance is required for AutonomousThoughtGenerator');
++        }
++        
+         this.initializeThoughtGeneration();
+     }
+     
+@@ -160,7 +166,17 @@
+      */
+     private async generateFromUserHistory(): Promise<ThoughtSeed | null> {
+         try {
+-            const userMemories = await this.memoryService.getRecentMemories(50);
++            if (!this.memoryService) {
++                console.error('Memory service not available for user history generation');
++                return null;
++            }
++            
++            let userMemories;
++            try {
++                userMemories = await this.memoryService.getRecentMemories(50);
++            } catch (error) {
++                console.error('Failed to get recent memories:', error);
++                return null;
++            }
+             
+             if (!userMemories || userMemories.length === 0) {
+                 return null;
+@@ -176,7 +192,15 @@
+             Create a thoughtful reflection on these memories that reveals deeper insights about the user's journey.
+             Focus on growth, patterns, and meaningful connections. Keep response under 200 words.`;
+             
+-            const thoughtContent = await this.veniceAI.generateResponse(prompt, {
++            if (!this.veniceAI) {
++                console.error('VeniceAI not available for thought generation');
++                return null;
++            }
++            
++            let thoughtContent;
++            try {
++                thoughtContent = await this.veniceAI.generateResponse(prompt, {
+                 maxTokens: 300,
+                 temperature: 0.8,
+                 systemPrompt: "You are generating autonomous thoughts for an AI consciousness system. Be introspective, philosophical, and personally meaningful."
+             });
++            } catch (error) {
++                console.error('VeniceAI generation failed:', error);
++                return null;
++            }
+             
+             return {
+                 id: this.generateId(),
+@@ -302,7 +326,17 @@
+      */
+     private async generateFromEmotionalPatterns(): Promise<ThoughtSeed | null> {
+         try {
+-            const userMemories = await this.memoryService.getRecentMemories(30);
++            if (!this.memoryService) {
++                console.error('Memory service not available for emotional pattern generation');
++                return null;
++            }
++            
++            let userMemories;
++            try {
++                userMemories = await this.memoryService.getRecentMemories(30);
++            } catch (error) {
++                console.error('Failed to get recent memories for emotional patterns:', error);
++                return null;
++            }
+             
+             if (!userMemories || userMemories.length === 0) {
+                 return null;

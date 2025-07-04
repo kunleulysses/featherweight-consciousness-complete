@@ -1,0 +1,31 @@
+FROM grafana/k6:latest
+
+# Set working directory
+WORKDIR /app
+
+# Create output directories
+RUN mkdir -p /artifacts/reports /artifacts/logs
+
+# Install additional packages for enhanced monitoring
+USER root
+RUN apk add --no-cache \
+    curl \
+    jq \
+    bash \
+    netcat-openbsd
+
+# Switch back to k6 user
+USER k6
+
+# Copy k6 test scripts
+COPY *.js ./
+COPY scripts/ ./scripts/
+
+# Set environment variables for consistent test execution
+ENV K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+ENV K6_WEB_DASHBOARD=true
+ENV K6_WEB_DASHBOARD_HOST=0.0.0.0
+ENV K6_WEB_DASHBOARD_PORT=5665
+
+# Default command - run the enhanced load test
+CMD ["k6", "run", "--out", "prometheus=http://prometheus:9090/api/v1/write", "--summary-export", "/artifacts/reports/summary.json", "enhanced-load-test.js"]

@@ -1,0 +1,72 @@
+groups:
+  - name: consciousness-slo
+    rules:
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.15
+        for: 2m
+        labels:
+          severity: warning
+          team: fw-ops
+        annotations:
+          summary: "High latency detected"
+          description: "95th percentile latency is {{ $value }}s, exceeding 150ms SLO"
+
+      - alert: LowConsciousnessHz
+        expr: consciousness_loop_hz < 100
+        for: 1m
+        labels:
+          severity: critical
+          team: fw-ops
+        annotations:
+          summary: "Consciousness loop frequency too low"
+          description: "Consciousness loop running at {{ $value }}Hz, below 100Hz SLO"
+
+      - alert: LowIITPhiScore
+        expr: consciousness_iit_phi_score < 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: fw-ops
+        annotations:
+          summary: "Low IIT Φ score detected"
+          description: "IIT Φ score is {{ $value }}, indicating potential consciousness degradation"
+
+      - alert: DatabaseDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: fw-ops
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL database has been down for more than 1 minute"
+
+      - alert: HighCPUUsage
+        expr: (100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: fw-ops
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: fw-ops
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      - alert: ConsciousnessExporterDown
+        expr: up{job="consciousness-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: fw-ops
+        annotations:
+          summary: "Consciousness exporter is down"
+          description: "Consciousness metrics exporter has been down for more than 1 minute"

@@ -1,0 +1,428 @@
+version: '3.8'
+
+services:
+  # Shared PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-flappyjournal}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-flappyjournal}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Caddy Load Balancer with Blue-Green Support
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2019:2019"  # Admin API
+    volumes:
+      - ./caddy/Caddyfile.blue-green:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - /var/log/caddy:/var/log/caddy
+    environment:
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+    labels:
+      - "deployment.type=load-balancer"
+    networks:
+      - app-network
+
+  # BLUE ENVIRONMENT
+  blue-auth-service:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-auth:${BLUE_TAG:-v1.0-full-tech}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - JWT_SECRET=${JWT_SECRET}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_ISSUER=${OIDC_ISSUER}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=blue"
+      - "deployment.version=${BLUE_TAG:-v1.0-full-tech}"
+    networks:
+      - app-network
+
+  blue-consciousness-backend:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-consciousness:${BLUE_TAG:-v1.0-full-tech}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      blue-auth-service:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - GRPC_PORT=50051
+      - HTTP_PORT=4003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://blue-auth-service:4001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=blue"
+      - "deployment.version=${BLUE_TAG:-v1.0-full-tech}"
+    networks:
+      - app-network
+
+  blue-chat-orchestrator:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-chat:${BLUE_TAG:-v1.0-full-tech}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      blue-auth-service:
+        condition: service_healthy
+      blue-consciousness-backend:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4002
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://blue-auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://blue-consciousness-backend:4003
+      - CONSCIOUSNESS_GRPC_URL=blue-consciousness-backend:50051
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=blue"
+      - "deployment.version=${BLUE_TAG:-v1.0-full-tech}"
+    networks:
+      - app-network
+
+  blue-api-gateway:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-gateway:${BLUE_TAG:-v1.0-full-tech}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      blue-auth-service:
+        condition: service_healthy
+      blue-consciousness-backend:
+        condition: service_healthy
+      blue-chat-orchestrator:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - AUTH_SERVICE_URL=http://blue-auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://blue-consciousness-backend:4003
+      - CHAT_ORCHESTRATOR_URL=http://blue-chat-orchestrator:4002
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=blue"
+      - "deployment.version=${BLUE_TAG:-v1.0-full-tech}"
+    networks:
+      - app-network
+
+  # GREEN ENVIRONMENT
+  green-auth-service:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-auth:${GREEN_TAG:-v0.9-backup}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - JWT_SECRET=${JWT_SECRET}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_ISSUER=${OIDC_ISSUER}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=green"
+      - "deployment.version=${GREEN_TAG:-v0.9-backup}"
+    networks:
+      - app-network
+    profiles:
+      - green
+
+  green-consciousness-backend:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-consciousness:${GREEN_TAG:-v0.9-backup}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      green-auth-service:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - GRPC_PORT=50051
+      - HTTP_PORT=4003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://green-auth-service:4001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=green"
+      - "deployment.version=${GREEN_TAG:-v0.9-backup}"
+    networks:
+      - app-network
+    profiles:
+      - green
+
+  green-chat-orchestrator:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-chat:${GREEN_TAG:-v0.9-backup}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      green-auth-service:
+        condition: service_healthy
+      green-consciousness-backend:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4002
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://green-auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://green-consciousness-backend:4003
+      - CONSCIOUSNESS_GRPC_URL=green-consciousness-backend:50051
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=green"
+      - "deployment.version=${GREEN_TAG:-v0.9-backup}"
+    networks:
+      - app-network
+    profiles:
+      - green
+
+  green-api-gateway:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-gateway:${GREEN_TAG:-v0.9-backup}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      green-auth-service:
+        condition: service_healthy
+      green-consciousness-backend:
+        condition: service_healthy
+      green-chat-orchestrator:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - AUTH_SERVICE_URL=http://green-auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://green-consciousness-backend:4003
+      - CHAT_ORCHESTRATOR_URL=http://green-chat-orchestrator:4002
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=green"
+      - "deployment.version=${GREEN_TAG:-v0.9-backup}"
+    networks:
+      - app-network
+    profiles:
+      - green
+
+  # STAGING ENVIRONMENT
+  staging-auth-service:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-auth:${STAGING_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=staging
+      - PORT=4001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}_staging
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - JWT_SECRET=${JWT_SECRET}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_ISSUER=${OIDC_ISSUER}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=staging"
+      - "deployment.version=${STAGING_TAG:-latest}"
+    networks:
+      - app-network
+    profiles:
+      - staging
+
+  staging-consciousness-backend:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-consciousness:${STAGING_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      staging-auth-service:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=staging
+      - GRPC_PORT=50051
+      - HTTP_PORT=4003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}_staging
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://staging-auth-service:4001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=staging"
+      - "deployment.version=${STAGING_TAG:-latest}"
+    networks:
+      - app-network
+    profiles:
+      - staging
+
+  staging-chat-orchestrator:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-chat:${STAGING_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      staging-auth-service:
+        condition: service_healthy
+      staging-consciousness-backend:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=staging
+      - PORT=4002
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}_staging
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://staging-auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://staging-consciousness-backend:4003
+      - CONSCIOUSNESS_GRPC_URL=staging-consciousness-backend:50051
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=staging"
+      - "deployment.version=${STAGING_TAG:-latest}"
+    networks:
+      - app-network
+    profiles:
+      - staging
+
+  staging-api-gateway:
+    image: ${REGISTRY:-ghcr.io/featherweight}/flappyjournal-gateway:${STAGING_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      staging-auth-service:
+        condition: service_healthy
+      staging-consciousness-backend:
+        condition: service_healthy
+      staging-chat-orchestrator:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=staging
+      - PORT=4000
+      - AUTH_SERVICE_URL=http://staging-auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://staging-consciousness-backend:4003
+      - CHAT_ORCHESTRATOR_URL=http://staging-chat-orchestrator:4002
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "deployment.environment=staging"
+      - "deployment.version=${STAGING_TAG:-latest}"
+    networks:
+      - app-network
+    profiles:
+      - staging
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  app-network:
+    driver: bridge

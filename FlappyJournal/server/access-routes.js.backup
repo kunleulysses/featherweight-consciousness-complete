@@ -1,0 +1,109 @@
+import express from 'express';
+import { authenticateToken, optionalAuth } from './auth-middleware.js';
+import {
+  validateAccessCode,
+  getAccessLogs,
+  addAccessCode,
+  getAccessStats,
+} from './access-code-service.js';
+
+const router = express.Router();
+
+// Validate access code endpoint
+router.post('/validate-access', validateAccessCode);
+
+// Admin endpoints (require authentication)
+router.get('/admin/access-logs', authenticateToken, getAccessLogs);
+router.post('/admin/access-codes', authenticateToken, addAccessCode);
+router.get('/admin/access-stats', authenticateToken, getAccessStats);
+
+// Real auth endpoints
+router.get('/auth/me', authenticateToken, (req, res) => {
+  res.json({
+    id: req.user.id,
+    email: req.user.email,
+    name: req.user.name || `${req.user.given_name || ''} ${req.user.family_name || ''}`.trim(),
+    preferred_username: req.user.preferred_username,
+    given_name: req.user.given_name,
+    family_name: req.user.family_name,
+    roles: req.user.roles,
+    isAuthenticated: true
+  });
+});
+
+// These endpoints are handled by Keycloak directly, but we provide info
+router.post('/auth/login', (req, res) => {
+  res.json({
+    message: 'Login should be handled by Keycloak',
+    keycloak_url: process.env.KEYCLOAK_URL || 'http://localhost:8082',
+    realm: process.env.KEYCLOAK_REALM || 'featherweight',
+    auth_endpoint: `${process.env.KEYCLOAK_URL || 'http://localhost:8082'}/realms/${process.env.KEYCLOAK_REALM || 'featherweight'}/protocol/openid-connect/auth`
+  });
+});
+
+router.post('/auth/register', (req, res) => {
+  res.json({
+    message: 'Registration should be handled by Keycloak',
+    keycloak_url: process.env.KEYCLOAK_URL || 'http://localhost:8082',
+    realm: process.env.KEYCLOAK_REALM || 'featherweight',
+    registration_endpoint: `${process.env.KEYCLOAK_URL || 'http://localhost:8082'}/realms/${process.env.KEYCLOAK_REALM || 'featherweight'}/account/`
+  });
+});
+
+router.post('/auth/logout', optionalAuth, (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logout successful'
+  });
+});
+
+// Sync user profile from Keycloak token
+router.post('/auth/sync', authenticateToken, (req, res) => {
+  // Here you would typically sync the user data with your database
+  // For now, just return the user info from the token
+  res.json({
+    id: req.user.id,
+    email: req.user.email,
+    name: req.user.name || `${req.user.given_name || ''} ${req.user.family_name || ''}`.trim(),
+    preferred_username: req.user.preferred_username,
+    given_name: req.user.given_name,
+    family_name: req.user.family_name,
+    roles: req.user.roles,
+    isAuthenticated: true
+  });
+});
+
+// Get user projects (mock for now)
+router.get('/projects/my', authenticateToken, (req, res) => {
+  res.json([]);
+});
+
+// Get project roles
+router.get('/projects/:projectId/roles', authenticateToken, (req, res) => {
+  const projectId = req.params.projectId;
+  const projectRoles = req.user.projectRoles[projectId] || [];
+  res.json({ roles: projectRoles });
+});
+
+// Check permissions
+router.get('/auth/permissions/:permission', authenticateToken, (req, res) => {
+  const permission = req.params.permission;
+  const resourceId = req.query.resourceId;
+  
+  // Basic permission check based on roles
+  let hasPermission = false;
+  
+  if (req.user.roles.includes('admin')) {
+    hasPermission = true;
+  } else if (permission === 'read' && req.user.roles.includes('viewer')) {
+    hasPermission = true;
+  } else if (permission === 'write' && req.user.roles.includes('collaborator')) {
+    hasPermission = true;
+  } else if (permission === 'research' && req.user.roles.includes('researcher')) {
+    hasPermission = true;
+  }
+  
+  res.json({ hasPermission });
+});
+
+export default router;

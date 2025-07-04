@@ -1,0 +1,39 @@
+{"cors":{"CREDENTIALS":false,"ORIGIN":["http://localhost:3000","http://localhost:3001","https://app.featherweight.world"]},"level":"info","message":"API Gateway started","nodeEnv":"development","port":4000,"rateLimit":{"MAX_REQUESTS":100,"SKIP_SUCCESSFUL_REQUESTS":false,"WINDOW_MS":300000},"service":"api-gateway","services":{"AUTH":"http://localhost:8081","CHAT_ORCHESTRATOR":"http://localhost:5002","FRONTEND":"http://localhost:3001","JOURNAL":"http://localhost:5000","WEBSOCKET":"http://localhost:5001"},"timestamp":"2025-07-04T01:04:26.240Z"}
+{"component":"http-request","level":"info","message":"GET /health 200 269 - 4.700ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:04:33.434Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:33.449Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:33.501Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:33.603Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:33.755Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:33.959Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:34.212Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:34.514Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:34.867Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:35.270Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:35.721Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:36.224Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:36.776Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:37.378Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:38.030Z"}
+{"component":"http-request","level":"info","message":"GET /api/docs - - - unknown anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:04:38.440Z"}
+{"component":"http-request","level":"info","message":"GET /health 200 269 - 0.486ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:04:38.442Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:38.732Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:39.483Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:40.285Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:41.138Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:42.040Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:42.992Z"}
+{"component":"http-request","level":"info","message":"GET /api/journal/test - - - unknown anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:04:43.447Z"}
+{"error":"connect ECONNREFUSED 127.0.0.1:6379","level":"error","message":"Redis connection error","service":"api-gateway","timestamp":"2025-07-04T01:04:43.995Z"}
+{"cors":{"CREDENTIALS":false,"ORIGIN":["http://localhost:3000","http://localhost:3001","https://app.featherweight.world"]},"level":"info","message":"API Gateway started","nodeEnv":"development","port":4000,"rateLimit":{"MAX_REQUESTS":100,"SKIP_SUCCESSFUL_REQUESTS":false,"WINDOW_MS":300000},"service":"api-gateway","services":{"AUTH":"http://localhost:8081","CHAT_ORCHESTRATOR":"http://localhost:5002","FRONTEND":"http://localhost:3001","JOURNAL":"http://localhost:5000","WEBSOCKET":"http://localhost:5001"},"timestamp":"2025-07-04T01:06:31.886Z"}
+{"component":"http-request","level":"info","message":"GET /health 200 269 - 3.205ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:40.301Z"}
+{"component":"http-request","level":"info","message":"GET /api/docs 301 158 - 1.582ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:40.307Z"}
+{"component":"http-request","level":"info","message":"GET /api/docs/openapi.json 200 4028 - 1.076ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:40.311Z"}
+{"component":"http-request","level":"info","message":"GET /health 200 269 - 0.425ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:40.313Z"}
+{"ip":"::1","level":"warn","message":"Express-JWT authentication failed: Missing or invalid authorization header","path":"/","service":"api-gateway","timestamp":"2025-07-04T01:06:40.317Z","userAgent":"Gateway-Test-Script"}
+{"component":"http-request","level":"info","message":"GET /api/journal/test 401 121 - 1.289ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:40.318Z"}
+{"component":"http-request","level":"info","message":"GET /api/auth/health 426 16 - 15.505ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:40.336Z"}
+{"ip":"::1","level":"warn","message":"Express-JWT authentication failed: Missing or invalid authorization header","path":"/","service":"api-gateway","timestamp":"2025-07-04T01:06:40.340Z","userAgent":"Gateway-Test-Script"}
+{"component":"http-request","level":"info","message":"GET /api/journal/health 401 121 - 0.936ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:40.341Z"}
+{"component":"http-request","level":"info","message":"GET /api/docs/openapi.json 200 4028 - 1.185ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:06:53.307Z"}
+{"component":"http-request","level":"info","message":"HEAD /health 200 269 - 0.462ms anonymous anonymous none","service":"api-gateway","timestamp":"2025-07-04T01:07:03.855Z"}
+{"level":"info","message":"Received SIGTERM, starting graceful shutdown","service":"api-gateway","timestamp":"2025-07-04T01:08:06.522Z"}

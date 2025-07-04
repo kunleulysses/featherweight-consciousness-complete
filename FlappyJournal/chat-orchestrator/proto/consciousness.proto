@@ -1,0 +1,186 @@
+syntax = "proto3";
+
+package consciousness;
+
+// Consciousness Loop Service Definition
+service ConsciousnessLoopService {
+  // Streaming consciousness loop
+  rpc StreamConsciousness(StreamConsciousnessRequest) returns (stream ConsciousnessThought);
+  
+  // Start consciousness loop
+  rpc StartLoop(StartLoopRequest) returns (StartLoopResponse);
+  
+  // Stop consciousness loop
+  rpc StopLoop(StopLoopRequest) returns (StopLoopResponse);
+  
+  // Get loop status
+  rpc GetLoopStatus(GetLoopStatusRequest) returns (LoopStatusResponse);
+  
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// Request to start streaming consciousness
+message StreamConsciousnessRequest {
+  string user_id = 1;
+  string session_id = 2;
+  string conversation_id = 3;
+  string project_id = 4;
+  StreamConfig config = 5;
+  repeated ContextMessage context = 6;
+}
+
+// Streaming configuration
+message StreamConfig {
+  int32 target_frequency_hz = 1;  // Target consciousness frequency (default 100Hz)
+  int32 max_thoughts_per_second = 2;  // Backpressure limit
+  int32 buffer_size = 3;  // Thought buffer size
+  bool autonomous_mode = 4;  // Enable autonomous thought generation
+  repeated string thought_types = 5;  // Allowed thought types
+}
+
+// Context message for consciousness
+message ContextMessage {
+  string role = 1;  // user, assistant, system
+  string content = 2;
+  int64 timestamp = 3;
+  string message_id = 4;
+}
+
+// Consciousness thought response
+message ConsciousnessThought {
+  string id = 1;
+  string content = 2;
+  int64 timestamp = 3;
+  ThoughtType type = 4;
+  float intensity = 5;  // 0.0-1.0 scale
+  float coherence = 6;  // 0.0-1.0 scale
+  int32 token_count = 7;
+  int32 processing_time_ms = 8;
+  StreamMetadata metadata = 9;
+}
+
+// Thought types
+enum ThoughtType {
+  CONSCIOUS = 0;
+  REFLECTION = 1;
+  OBSERVATION = 2;
+  DECISION = 3;
+  AUTONOMOUS = 4;
+}
+
+// Stream metadata
+message StreamMetadata {
+  int32 sequence_number = 1;
+  float stream_health = 2;  // 0.0-1.0 health score
+  int32 backpressure_level = 3;  // 0-10 scale
+  int32 buffer_utilization = 4;  // 0-100 percentage
+}
+
+// Start loop request
+message StartLoopRequest {
+  string user_id = 1;
+  string project_id = 2;
+  LoopConfig config = 3;
+  AuthContext auth = 4;
+}
+
+// Loop configuration
+message LoopConfig {
+  int32 frequency_hz = 1;
+  bool enable_autonomous_thoughts = 2;
+  int32 max_concurrent_streams = 3;
+  int32 timeout_seconds = 4;
+}
+
+// Authentication context
+message AuthContext {
+  string token = 1;
+  string project_id = 2;
+  repeated string scopes = 3;
+  int64 expires_at = 4;
+}
+
+// Start loop response
+message StartLoopResponse {
+  bool success = 1;
+  string message = 2;
+  string loop_id = 3;
+  LoopStatus status = 4;
+}
+
+// Stop loop request
+message StopLoopRequest {
+  string loop_id = 1;
+  string user_id = 2;
+  AuthContext auth = 3;
+}
+
+// Stop loop response
+message StopLoopResponse {
+  bool success = 1;
+  string message = 2;
+  LoopStatus final_status = 3;
+}
+
+// Get loop status request
+message GetLoopStatusRequest {
+  string loop_id = 1;
+  AuthContext auth = 2;
+}
+
+// Loop status response
+message LoopStatusResponse {
+  LoopStatus status = 1;
+  LoopMetrics metrics = 2;
+}
+
+// Loop status
+message LoopStatus {
+  string loop_id = 1;
+  LoopState state = 2;
+  int64 started_at = 3;
+  int64 last_activity = 4;
+  int32 active_streams = 5;
+  string error_message = 6;
+}
+
+// Loop state enum
+enum LoopState {
+  STOPPED = 0;
+  STARTING = 1;
+  RUNNING = 2;
+  STOPPING = 3;
+  ERROR = 4;
+}
+
+// Loop metrics
+message LoopMetrics {
+  int64 total_thoughts_generated = 1;
+  float average_thoughts_per_second = 2;
+  float average_coherence = 3;
+  int32 active_connections = 4;
+  float cpu_usage = 5;
+  float memory_usage_mb = 6;
+  int64 uptime_seconds = 7;
+}
+
+// Health check request
+message HealthCheckRequest {
+  string service = 1;
+}
+
+// Health check response
+message HealthCheckResponse {
+  HealthStatus status = 1;
+  string message = 2;
+  int64 timestamp = 3;
+}
+
+// Health status enum
+enum HealthStatus {
+  UNKNOWN = 0;
+  HEALTHY = 1;
+  DEGRADED = 2;
+  UNHEALTHY = 3;
+}

@@ -1,0 +1,219 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-flappyjournal}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-flappyjournal}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # 2. Auth Service
+  auth-service:
+    build:
+      context: ../auth-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - JWT_SECRET=${JWT_SECRET}
+      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_ISSUER=${OIDC_ISSUER}
+    ports:
+      - "4001:4001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+  # 3. Consciousness Backend (gRPC 50051 / HTTP 4003)
+  consciousness-backend:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - GRPC_PORT=50051
+      - HTTP_PORT=4003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://auth-service:4001
+    ports:
+      - "50051:50051"
+      - "4003:4003"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+  # 4. Chat Orchestrator
+  chat-orchestrator:
+    build:
+      context: ../chat-orchestrator
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      consciousness-backend:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4002
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-flappyjournal}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - AUTH_SERVICE_URL=http://auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://consciousness-backend:4003
+      - CONSCIOUSNESS_GRPC_URL=consciousness-backend:50051
+    ports:
+      - "4002:4002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+  # 5. API Gateway
+  api-gateway:
+    build:
+      context: ../api-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      consciousness-backend:
+        condition: service_healthy
+      chat-orchestrator:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - AUTH_SERVICE_URL=http://auth-service:4001
+      - CONSCIOUSNESS_BACKEND_URL=http://consciousness-backend:4003
+      - CHAT_ORCHESTRATOR_URL=http://chat-orchestrator:4002
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+  # 6. WebSocket Monitor
+  websocket-monitor:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      consciousness-backend:
+        condition: service_healthy
+      chat-orchestrator:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - PORT=4004
+      - AUTH_SERVICE_URL=http://auth-service:4001
+      - API_GATEWAY_URL=http://api-gateway:4000
+      - CHAT_ORCHESTRATOR_URL=http://chat-orchestrator:4002
+    ports:
+      - "4004:4004"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+  # 7. Caddy Reverse Proxy
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      chat-orchestrator:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+    healthcheck:
+      test: ["CMD", "caddy", "version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  app-network:
+    driver: bridge

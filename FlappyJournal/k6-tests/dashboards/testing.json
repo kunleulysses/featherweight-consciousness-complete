@@ -1,0 +1,307 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "FlappyJournal SLO Testing Dashboard",
+    "tags": ["slo", "testing", "k6", "performance"],
+    "timezone": "browser",
+    "refresh": "5s",
+    "time": {
+      "from": "now-30m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Auth Latency SLO",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"featherweight-api\", endpoint=~\".*auth.*\"}[5m])) by (le))",
+            "refId": "A",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"featherweight-api\", endpoint=~\".*auth.*\"}[5m])) by (le))",
+            "refId": "B",
+            "legendFormat": "99th percentile"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1.0},
+                {"color": "red", "value": 2.0}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Upload Success Rate SLO",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{job=\"featherweight-api\", endpoint=~\".*upload.*\", code!~\"4.*|5.*\"}[5m])) / sum(rate(http_requests_total{job=\"featherweight-api\", endpoint=~\".*upload.*\"}[5m])) * 100",
+            "refId": "A",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "WebSocket Messages/Second",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(websocket_messages_total{job=\"chat-orchestrator\"}[1m])",
+            "refId": "A",
+            "legendFormat": "Messages/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Loop Hz Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(hz_avg)",
+            "refId": "A",
+            "legendFormat": "Average Hz"
+          },
+          {
+            "expr": "min(hz_avg)",
+            "refId": "B",
+            "legendFormat": "Min Hz"
+          },
+          {
+            "expr": "max(hz_avg)",
+            "refId": "C",
+            "legendFormat": "Max Hz"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "hertz",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 90},
+                {"color": "green", "value": 95}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Database Pool Saturation",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "db_pool_active_connections / db_pool_max_connections * 100",
+            "refId": "A",
+            "legendFormat": "Pool Utilization %"
+          },
+          {
+            "expr": "db_pool_idle_connections",
+            "refId": "B",
+            "legendFormat": "Idle Connections"
+          },
+          {
+            "expr": "db_pool_active_connections",
+            "refId": "C",
+            "legendFormat": "Active Connections"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 90}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Alertmanager Firing Alerts",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "ALERTS{alertstate=\"firing\"}",
+            "refId": "A",
+            "legendFormat": "{{alertname}} - {{severity}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "displayMode": "table"
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "K6 Test Metrics Overview",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(k6_http_reqs_total[1m])",
+            "refId": "A",
+            "legendFormat": "HTTP Requests/sec"
+          },
+          {
+            "expr": "rate(k6_checks_total[1m])",
+            "refId": "B",
+            "legendFormat": "Checks/sec"
+          },
+          {
+            "expr": "k6_vus",
+            "refId": "C",
+            "legendFormat": "Virtual Users"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Error Rate SLO",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{code=~\"4.*|5.*\"}[5m])) / sum(rate(http_requests_total[5m])) * 100",
+            "refId": "A",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 32}
+      },
+      {
+        "id": 9,
+        "title": "Response Time P95",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+            "refId": "A",
+            "legendFormat": "P95 Response Time"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1.0},
+                {"color": "red", "value": 2.0}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 32}
+      },
+      {
+        "id": 10,
+        "title": "WebSocket Connection Errors",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(ws_connection_errors)",
+            "refId": "A",
+            "legendFormat": "WS Errors"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 32}
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "job",
+          "type": "query",
+          "query": "label_values(up, job)",
+          "refresh": 1,
+          "includeAll": true,
+          "allValue": ".*"
+        },
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(up{job=~\"$job\"}, instance)",
+          "refresh": 1,
+          "includeAll": true,
+          "allValue": ".*"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Test Events",
+          "datasource": "Prometheus",
+          "expr": "ALERTS{alertstate=\"firing\"}",
+          "titleFormat": "{{alertname}}",
+          "textFormat": "{{description}}"
+        }
+      ]
+    }
+  }
+}

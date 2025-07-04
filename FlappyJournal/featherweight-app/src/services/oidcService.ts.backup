@@ -1,0 +1,269 @@
+import { UserManager, User as OidcUser, UserManagerSettings, WebStorageStateStore } from 'oidc-client-ts';
+import { User } from '../types/auth';
+
+class OIDCService {
+  private userManager: UserManager;
+  private settings: UserManagerSettings;
+
+  constructor() {
+    const keycloakUrl = process.env.REACT_APP_KEYCLOAK_URL || 'http://localhost:8080';
+    const realm = process.env.REACT_APP_KEYCLOAK_REALM || 'featherweight';
+    const clientId = process.env.REACT_APP_KEYCLOAK_CLIENT_ID || 'featherweight-frontend';
+
+    this.settings = {
+      authority: `${keycloakUrl}/realms/${realm}`,
+      client_id: clientId,
+      redirect_uri: `${window.location.origin}/auth/callback`,
+      post_logout_redirect_uri: `${window.location.origin}/logout`,
+      response_type: 'code',
+      scope: 'openid profile email',
+      automaticSilentRenew: true,
+      silent_redirect_uri: `${window.location.origin}/auth/silent-callback`,
+      includeIdTokenInSilentRenew: true,
+      userStore: new WebStorageStateStore({ store: window.sessionStorage }),
+      
+      // Token management
+      accessTokenExpiringNotificationTimeInSeconds: 300, // 5 minutes before expiry
+      monitorSession: true,
+      checkSessionIntervalInSeconds: 10,
+      
+      // Security settings
+      loadUserInfo: true,
+      filterProtocolClaims: true,
+      
+      // Additional metadata
+      metadata: {
+        issuer: `${keycloakUrl}/realms/${realm}`,
+        authorization_endpoint: `${keycloakUrl}/realms/${realm}/protocol/openid-connect/auth`,
+        token_endpoint: `${keycloakUrl}/realms/${realm}/protocol/openid-connect/token`,
+        userinfo_endpoint: `${keycloakUrl}/realms/${realm}/protocol/openid-connect/userinfo`,
+        end_session_endpoint: `${keycloakUrl}/realms/${realm}/protocol/openid-connect/logout`,
+        jwks_uri: `${keycloakUrl}/realms/${realm}/protocol/openid-connect/certs`,
+      }
+    };
+
+    this.userManager = new UserManager(this.settings);
+    this.setupEventHandlers();
+  }
+
+  private setupEventHandlers(): void {
+    // Handle access token expiring
+    this.userManager.events.addAccessTokenExpiring(() => {
+      console.log('Access token expiring, attempting silent renewal...');
+    });
+
+    // Handle access token expired
+    this.userManager.events.addAccessTokenExpired(() => {
+      console.log('Access token expired');
+      this.signoutRedirect();
+    });
+
+    // Handle silent renewal error
+    this.userManager.events.addSilentRenewError((error) => {
+      console.error('Silent renewal error:', error);
+      this.signoutRedirect();
+    });
+
+    // Handle user loaded
+    this.userManager.events.addUserLoaded((user) => {
+      console.log('User loaded:', user.profile.preferred_username);
+    });
+
+    // Handle user unloaded
+    this.userManager.events.addUserUnloaded(() => {
+      console.log('User unloaded');
+    });
+
+    // Handle user session changed
+    this.userManager.events.addUserSessionChanged(() => {
+      console.log('User session changed');
+    });
+  }
+
+  // Authentication methods
+  async signinRedirect(extraQueryParams?: Record<string, string>): Promise<void> {
+    try {
+      await this.userManager.signinRedirect({
+        extraQueryParams,
+        state: window.location.pathname + window.location.search
+      });
+    } catch (error) {
+      console.error('Signin redirect failed:', error);
+      throw new Error('Failed to initiate login');
+    }
+  }
+
+  async signinRedirectCallback(): Promise<OidcUser> {
+    try {
+      const user = await this.userManager.signinRedirectCallback();
+      return user;
+    } catch (error) {
+      console.error('Signin callback failed:', error);
+      throw new Error('Login callback failed');
+    }
+  }
+
+  async signoutRedirect(extraQueryParams?: Record<string, string>): Promise<void> {
+    try {
+      await this.userManager.signoutRedirect({
+        extraQueryParams,
+        post_logout_redirect_uri: `${window.location.origin}/`
+      });
+    } catch (error) {
+      console.error('Signout redirect failed:', error);
+      throw new Error('Failed to initiate logout');
+    }
+  }
+
+  async signoutRedirectCallback(): Promise<void> {
+
+  async signinSilentCallback(): Promise<void> {
+    return this.userManager.signinSilentCallback();
+  }
+    try {
+      await this.userManager.signoutRedirectCallback();
+
+  async signinSilentCallback(): Promise<void> {
+    return this.userManager.signinSilentCallback();
+  }
+    } catch (error) {
+      console.error('Signout callback failed:', error);
+      throw new Error('Logout callback failed');
+    }
+  }
+
+  async getUser(): Promise<OidcUser | null> {
+    try {
+      return await this.userManager.getUser();
+    } catch (error) {
+      console.error('Get user failed:', error);
+      return null;
+    }
+  }
+
+  async removeUser(): Promise<void> {
+    try {
+      await this.userManager.removeUser();
+    } catch (error) {
+      console.error('Remove user failed:', error);
+    }
+  }
+
+  async signinSilent(): Promise<OidcUser | null> {
+    try {
+      return await this.userManager.signinSilent();
+    } catch (error) {
+      console.error('Silent signin failed:', error);
+      return null;
+    }
+  }
+
+  // Token management
+  async getAccessToken(): Promise<string | null> {
+    try {
+      const user = await this.getUser();
+      return user?.access_token || null;
+    } catch (error) {
+      console.error('Get access token failed:', error);
+      return null;
+    }
+  }
+
+  async getIdToken(): Promise<string | null> {
+    try {
+      const user = await this.getUser();
+      return user?.id_token || null;
+    } catch (error) {
+      console.error('Get ID token failed:', error);
+      return null;
+    }
+  }
+
+  // User profile conversion
+  convertOidcUserToAppUser(oidcUser: OidcUser): User {
+    const profile = oidcUser.profile as any;
+    
+    return {
+      id: profile.sub,
+      email: profile.email || '',
+      firstName: profile.given_name || '',
+      lastName: profile.family_name || '',
+      role: this.extractUserRole(profile.realm_access?.roles || []),
+      organization: profile.organization || '',
+      researchAreas: profile.research_areas || [],
+      avatar: profile.picture,
+      isVerified: profile.email_verified || false,
+      createdAt: new Date(),
+      lastLoginAt: new Date()
+    };
+  }
+
+  private extractUserRole(roles: string[]): any {
+    // Priority order for role assignment
+    const rolePriority = ['admin', 'researcher', 'collaborator', 'viewer'];
+    
+    for (const role of rolePriority) {
+      if (roles.includes(role)) {
+        return role;
+      }
+    }
+    
+    return 'viewer'; // Default role
+  }
+
+  // RBAC helpers
+  async hasRole(role: string): Promise<boolean> {
+    try {
+      const user = await this.getUser();
+      if (!user) return false;
+      
+      const roles = (user.profile as any).realm_access?.roles || [];
+      return roles.includes(role);
+    } catch (error) {
+      console.error('Check role failed:', error);
+      return false;
+    }
+  }
+
+  async hasAnyRole(roles: string[]): Promise<boolean> {
+    try {
+      const user = await this.getUser();
+      if (!user) return false;
+      
+      const userRoles = (user.profile as any).realm_access?.roles || [];
+      return roles.some(role => userRoles.includes(role));
+    } catch (error) {
+      console.error('Check any role failed:', error);
+      return false;
+    }
+  }
+
+  async getProjectRoles(projectId: string): Promise<string[]> {
+    try {
+      const user = await this.getUser();
+      if (!user) return [];
+      
+      // Extract project-specific roles from user claims
+      const projectRoles = (user.profile as any).project_roles || {};
+      return projectRoles[projectId] || [];
+    } catch (error) {
+      console.error('Get project roles failed:', error);
+      return [];
+    }
+  }
+
+  // Utility methods
+  isAuthenticated(): Promise<boolean> {
+    return this.getUser().then(user => !!user && !user.expired);
+  }
+
+  getSettings(): UserManagerSettings {
+    return this.settings;
+  }
+
+  getUserManager(): UserManager {
+    return this.userManager;
+  }
+}
+
+export const oidcService = new OIDCService();

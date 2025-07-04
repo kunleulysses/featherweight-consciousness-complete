@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  k6-websocket-streaming:
+    build: .
+    image: fw-k6:latest
+    environment:
+      - TEST_TYPE=websocket-streaming
+      - VUS=1000
+      - DURATION=5m
+      - BASE_URL=http://host.docker.internal:4000
+      - WS_URL=ws://host.docker.internal:8080
+      - CHAT_ORCHESTRATOR_URL=http://host.docker.internal:8080
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+    networks:
+      - k6-test
+    depends_on:
+      - prometheus
+    profiles:
+      - load-test
+
+  k6-health-check:
+    build: .
+    image: fw-k6:latest
+    environment:
+      - TEST_TYPE=health
+      - BASE_URL=http://host.docker.internal:4000
+      - WS_URL=ws://host.docker.internal:8080
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+    networks:
+      - k6-test
+    profiles:
+      - health
+
+  k6-comprehensive:
+    build: .
+    image: fw-k6:latest
+    environment:
+      - TEST_TYPE=comprehensive
+      - VUS=500
+      - DURATION=3m
+      - BASE_URL=http://host.docker.internal:4000
+      - WS_URL=ws://host.docker.internal:8080
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+    networks:
+      - k6-test
+    profiles:
+      - comprehensive
+
+  # Prometheus for metrics collection during tests
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerting-rules.yml:/etc/prometheus/alerting-rules.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=1h'
+      - '--web.enable-lifecycle'
+      - '--enable-feature=remote-write-receiver'
+    networks:
+      - k6-test
+    profiles:
+      - monitoring
+
+  # Grafana for visualization with auto-loaded dashboards
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/testing.json
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana-provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - k6-test
+    profiles:
+      - monitoring
+
+networks:
+  k6-test:
+    driver: bridge
+
+volumes:
+  grafana-storage:

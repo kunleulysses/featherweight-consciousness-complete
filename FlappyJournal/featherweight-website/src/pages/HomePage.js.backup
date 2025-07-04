@@ -1,0 +1,369 @@
+import React, { useEffect, useRef } from 'react';
+import styled from 'styled-components';
+
+const HeroSection = styled.section`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f3f4f7 0%, #e2e3e8 50%, #f3f4f7 100%);
+`;
+
+const HeartbeatContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const HeartbeatVisualization = styled.canvas`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      
+      
+      // Brown color palette array
+      const brownColors = [
+        'rgba(139, 90, 60, 0.4)',    // Main brown
+        'rgba(160, 120, 93, 0.3)',   // Lighter brown
+        'rgba(101, 67, 33, 0.5)',    // Darker brown
+        'rgba(196, 164, 132, 0.3)',  // Beige brown
+        'rgba(92, 51, 23, 0.4)',     // Deep brown
+        'rgba(181, 142, 99, 0.3)',   // Medium brown
+        'rgba(139, 69, 19, 0.4)',    // Saddle brown
+        'rgba(205, 133, 63, 0.3)'    // Peru brown
+      ];
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      // Brown color palette array
+      const brownColors = [
+        'rgba(139, 90, 60, 0.4)',    // Main brown
+        'rgba(160, 120, 93, 0.3)',   // Lighter brown
+        'rgba(101, 67, 33, 0.5)',    // Darker brown
+        'rgba(196, 164, 132, 0.3)',  // Beige brown
+        'rgba(92, 51, 23, 0.4)',     // Deep brown
+        'rgba(181, 142, 99, 0.3)',   // Medium brown
+        'rgba(139, 69, 19, 0.4)',    // Saddle brown
+        'rgba(205, 133, 63, 0.3)'    // Peru brown
+      ];
+      
+      // Slower, longer-lasting circles
+      for (let i = 0; i < 8; i++) {
+        const radius = 30 + Math.sin(time * 0.005 + i * 0.8) * 120;
+        const opacity = 0.2 + Math.sin(time * 0.008 + i * 0.6) * 0.15;
+        const colorIndex = Math.floor((time * 0.003 + i * 1.2) % brownColors.length);
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = brownColors[colorIndex].replace(/0\.\d+/, opacity.toFixed(2));
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+      
+      // Slower floating particles with brown variations
+      for (let i = 0; i < 60; i++) {
+        const x = Math.sin(time * 0.003 + i * 0.15) * 400 + centerX;
+        const y = Math.cos(time * 0.004 + i * 0.12) * 300 + centerY;
+        const size = Math.sin(time * 0.006 + i * 0.3) * 3 + 4;
+        const colorIndex = Math.floor((time * 0.002 + i * 0.5) % brownColors.length);
+        
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = brownColors[colorIndex];
+        ctx.fill();
+      }
+      
+      // Additional slower wave patterns
+      for (let i = 0; i < 3; i++) {
+        const waveY = centerY + Math.sin(time * 0.004 + i * 2) * 50;
+        const opacity = 0.15 + Math.sin(time * 0.006 + i) * 0.1;
+        
+        ctx.beginPath();
+        ctx.moveTo(0, waveY);
+        for (let x = 0; x <= canvas.width; x += 20) {
+          const y = waveY + Math.sin((x + time * 0.8) * 0.01) * 20;
+          ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = brownColors[i * 2].replace(/0\.\d+/, opacity.toFixed(2));
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      
+      time += 0.3; // Much slower increment for longer-lasting animation
+      animationId = requestAnimationFrame(animate);
+    };
+  z-index: 1;
+  opacity: 0.4;
+`;
+
+const HeroContent = styled.div`
+  text-align: center;
+  z-index: 2;
+  position: relative;
+  color: #1a1a1a;
+  max-width: 800px;
+  padding: 0 20px;
+`;
+
+const MainHeadline = styled.h1`
+  font-size: 3.5rem;
+  margin-bottom: 2rem;
+  background: var(--gradient-color);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  @media (max-width: 768px) {
+    font-size: 2.8rem;
+  }
+`;
+
+const SubHeadline = styled.p`
+  font-size: 1.3rem;
+  margin-bottom: 3rem;
+  opacity: 0.9;
+  letter-spacing: 0.02em;
+`;
+
+const CTAContainer = styled.div`
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+`;
+
+const CTAButton = styled.button`
+  padding: 15px 30px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  border: 2px solid;
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  min-width: 200px;
+  cursor: pointer;
+  
+  &.primary {
+    background: var(--gradient-color);
+    color: white;
+    border-color: transparent;
+    
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(139, 90, 60, 0.15);
+    }
+  }
+  
+  &.secondary {
+    background: transparent;
+    color: #1a1a1a;
+    border-color: #1a1a1a;
+    
+    &:hover {
+      background: #1a1a1a;
+      color: #f3f4f7;
+    }
+  }
+`;
+
+const NavigationSection = styled.section`
+  padding: 120px 0;
+  background: white;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+`;
+
+const NavigationGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+`;
+
+const NavigationCard = styled.div`
+  text-align: center;
+  padding: 3rem 2rem;
+  border-radius: 14px;
+  background: #f9fafc;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    border-color: #8b5a3c;
+  }
+  
+  h3 {
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+    font-size: 1.5rem;
+  }
+  
+  p {
+    color: #666;
+    margin-bottom: 2rem;
+  }
+  
+  button {
+    background: var(--gradient-color);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+`;
+
+const HomePage = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    let animationId;
+    let time = 0;
+    
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      
+      
+      // Brown color palette array
+      const brownColors = [
+        'rgba(139, 90, 60, 0.4)',    // Main brown
+        'rgba(160, 120, 93, 0.3)',   // Lighter brown
+        'rgba(101, 67, 33, 0.5)',    // Darker brown
+        'rgba(196, 164, 132, 0.3)',  // Beige brown
+        'rgba(92, 51, 23, 0.4)',     // Deep brown
+        'rgba(181, 142, 99, 0.3)',   // Medium brown
+        'rgba(139, 69, 19, 0.4)',    // Saddle brown
+        'rgba(205, 133, 63, 0.3)'    // Peru brown
+      ];
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      for (let i = 0; i < 5; i++) {
+        const radius = 50 + Math.sin(time * 0.02 + i * 0.5) * 100;
+        const opacity = 0.3 + Math.sin(time * 0.02 + i * 0.5) * 0.15;
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(139, 90, 60, ${opacity})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      
+      for (let i = 0; i < 50; i++) {
+        const x = Math.sin(time * 0.01 + i * 0.1) * 300 + centerX;
+        const y = Math.cos(time * 0.015 + i * 0.1) * 200 + centerY;
+        const size = Math.sin(time * 0.02 + i * 0.2) * 2 + 3;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(139, 90, 60, 0.8)`;
+        ctx.fill();
+      }
+      
+      time++;
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const openPortal = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  return (
+    <>
+      <HeroSection id="home">
+        <HeartbeatContainer>
+          <HeartbeatVisualization ref={canvasRef} />
+        </HeartbeatContainer>
+        
+        <HeroContent>
+          <MainHeadline className="luxury-gradient">
+            Welcome to Featherweight
+          </MainHeadline>
+          <SubHeadline className="accent-gradient">
+            The Dawn of Computational Consciousness
+          </SubHeadline>
+          <CTAContainer>
+            <CTAButton className="primary" onClick={() => scrollToSection('architecture')}>
+              Explore the Technology
+            </CTAButton>
+            <CTAButton className="secondary" onClick={() => openPortal('https://app.featherweight.world')}>
+              Research Portal
+            </CTAButton>
+          </CTAContainer>
+        </HeroContent>
+      </HeroSection>
+      
+      <NavigationSection>
+        <NavigationGrid>
+          <NavigationCard onClick={() => openPortal('https://app.featherweight.world')}>
+            <h3>For Researchers</h3>
+            <p>Access cutting-edge consciousness research tools and collaborate with leading institutions worldwide.</p>
+            <button>Research Portal</button>
+          </NavigationCard>
+          
+          <NavigationCard onClick={() => openPortal('https://demo.featherweight.world')}>
+            <h3>For Commercial Partners</h3>
+            <p>Discover transformative AI solutions for healthcare, education, and enterprise applications.</p>
+            <button>Commercial Demo</button>
+          </NavigationCard>
+          
+          <NavigationCard onClick={() => scrollToSection('architecture')}>
+            <h3>Explore Technology</h3>
+            <p>Dive deep into our validated consciousness architecture and revolutionary capabilities.</p>
+            <button>Learn More</button>
+          </NavigationCard>
+        </NavigationGrid>
+      </NavigationSection>
+    </>
+  );
+};
+
+export default HomePage;

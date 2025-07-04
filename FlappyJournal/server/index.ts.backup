@@ -1,0 +1,18 @@
+import express from 'express';
+import { websocketHealthCheck, apiHealthCheck } from './websocket-health';
+
+const app = express();
+
+// WebSocket health check
+app.get('/ws/health', websocketHealthCheck);
+
+// API health check
+app.get('/api/health', apiHealthCheck);
+
+// Additional routes and middleware...
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log();
+});
+

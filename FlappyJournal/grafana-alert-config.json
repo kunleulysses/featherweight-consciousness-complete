@@ -1,0 +1,55 @@
+{
+  "alert": {
+    "id": "venice-error-rate-alert",
+    "title": "Venice Error Rate Critical Alert",
+    "message": "Venice error rate exceeded 5% for 10 minutes - Page SRE immediately",
+    "frequency": "1m",
+    "conditions": [
+      {
+        "query": {
+          "queryType": "prometheus",
+          "refId": "A",
+          "model": {
+            "expr": "(rate(venice_errors_total[10m]) / rate(venice_requests_total[10m])) * 100",
+            "intervalMs": 60000,
+            "maxDataPoints": 43200
+          }
+        },
+        "reducer": {
+          "type": "last",
+          "params": []
+        },
+        "evaluator": {
+          "params": [5],
+          "type": "gt"
+        }
+      }
+    ],
+    "executionErrorState": "alerting",
+    "noDataState": "no_data",
+    "for": "10m",
+    "annotations": {
+      "description": "Venice AI service error rate has exceeded 5% for more than 10 minutes. This affects the >99.9% uptime and <100ms response-time KPIs critical to the consciousness roadmap.",
+      "runbook_url": "https://wiki.company.com/runbooks/venice-error-response",
+      "summary": "Critical: Venice error rate > 5% for 10m - Page SRE"
+    },  
+    "labels": {
+      "severity": "critical",
+      "service": "venice-ai",
+      "team": "sre",
+      "alert_type": "error_rate"
+    }
+  },
+  "notificationChannels": [
+    {
+      "type": "pagerduty",
+      "name": "SRE PagerDuty",
+      "settings": {
+        "integrationKey": "REPLACE_WITH_PAGERDUTY_INTEGRATION_KEY",
+        "severity": "critical",
+        "class": "venice-ai",
+        "component": "consciousness-platform"
+      }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alerting configuration
+rule_files:
+  - "alerting-rules.yml"
+
+# Remote write configuration for k6 metrics
+remote_write:
+  - url: "http://localhost:9090/api/v1/write"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 2500
+
+scrape_configs:
+  - job_name: 'featherweight-api'
+    static_configs:
+      - targets: ['host.docker.internal:4000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  - job_name: 'chat-orchestrator'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # K6 metrics collection
+  - job_name: 'k6'
+    static_configs:
+      - targets: ['host.docker.internal:6565']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  # Application metrics for SLO monitoring
+  - job_name: 'app-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:4000', 'host.docker.internal:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'http_request_duration_seconds.*'
+        target_label: '__name__'
+        replacement: '${1}'
+      - source_labels: [__name__]
+        regex: 'http_requests_total.*'
+        target_label: '__name__'
+        replacement: '${1}'

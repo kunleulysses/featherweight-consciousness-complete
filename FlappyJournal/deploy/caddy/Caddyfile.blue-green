@@ -1,0 +1,127 @@
+# Blue-Green Deployment Caddyfile for FlappyJournal
+# This configuration supports instant switching between blue and green environments
+
+# Production domain (current active environment)
+app.featherweight.world {
+    # Default to blue environment (will be updated by deployment script)
+    reverse_proxy blue-api-gateway:4000 {
+        health_uri /api/health
+        health_interval 30s
+        health_timeout 10s
+        fail_duration 30s
+        max_fails 3
+    }
+    
+    # Enable automatic HTTPS
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+    
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' wss: ws:;"
+    }
+    
+    # Rate limiting
+    rate_limit {
+        zone dynamic {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+    }
+    
+    # Logging
+    log {
+        output file /var/log/caddy/production.log {
+            roll_size 100mb
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
+        level INFO
+    }
+}
+
+# Staging environment (always points to staging stack)
+staging.app.featherweight.world {
+    reverse_proxy staging-api-gateway:4000 {
+        health_uri /api/health
+        health_interval 30s
+        health_timeout 10s
+        fail_duration 30s
+        max_fails 3
+    }
+    
+    # Enable automatic HTTPS
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+    
+    # Basic auth for staging (optional)
+    basicauth /* {
+        staging $2a$10$Tb0A1Sh8b4GnTdQEO9YgKuCQZQ8r0v1KqD5N8p3GgDjS5Y4E0x2Uy
+    }
+    
+    # Logging
+    log {
+        output file /var/log/caddy/staging.log {
+            roll_size 50mb
+            roll_keep 3
+            roll_keep_for 168h
+        }
+        format json
+        level DEBUG
+    }
+}
+
+# Blue environment (production candidate)
+blue.internal.featherweight.world {
+    reverse_proxy blue-api-gateway:4000 {
+        health_uri /api/health
+        health_interval 30s
+        health_timeout 10s
+    }
+    
+    # Internal access only
+    @internal_only {
+        remote_ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+    }
+    handle @internal_only {
+        reverse_proxy blue-api-gateway:4000
+    }
+    respond 403
+}
+
+# Green environment (production candidate)
+green.internal.featherweight.world {
+    reverse_proxy green-api-gateway:4000 {
+        health_uri /api/health
+        health_interval 30s
+        health_timeout 10s
+    }
+    
+    # Internal access only
+    @internal_only {
+        remote_ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+    }
+    handle @internal_only {
+        reverse_proxy green-api-gateway:4000
+    }
+    respond 403
+}
+
+# Health check endpoint
+health.featherweight.world {
+    respond /health "OK" 200
+    
+    # Caddy status endpoint
+    handle /caddy/* {
+        admin 0.0.0.0:2019
+    }
+}

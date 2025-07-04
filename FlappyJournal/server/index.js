@@ -1,0 +1,100 @@
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from 'express';
+import cors from 'cors';
+import { createServer } from 'http';
+import accessRoutes from './access-routes.js';
+import dashboardRoutes from './dashboard-routes.js';
+import memoryRoutes from './src/routes/memory.js';
+import dataSourcesRoutes from './src/routes/datasources.js';
+import { setupResearchWebSocketServer } from "./dual-consciousness-ws.js";
+
+const app = express();
+const server = createServer(app);
+
+// Middleware
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:4000', 'https://app.featherweight.world'],
+  credentials: true
+}));
+app.use(express.json());
+
+// Serve static files from React build
+app.use(express.static(path.resolve(__dirname, './public')));
+
+// Routes
+app.use('/api', accessRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/memory', memoryRoutes);
+app.use('/api/datasources', dataSourcesRoutes);
+
+// Health checks
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    service: 'featherweight-backend',
+    timestamp: new Date().toISOString(),
+    features: {
+      authentication: true,
+      dashboard: true,
+      chat: true,
+      memory: true,
+      datasources: true
+    }
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Setup WebSocket server for chat
+setupResearchWebSocketServer(server);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Health check available at http://localhost:${PORT}/api/health`);
+  console.log(`WebSocket server ready for connections`);
+});
+
+export default app;
+
+// Catch-all route for client-side routing
+app.get('*', (req, res) => {
+  // If this is an API route, return 404
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  
+  // For any other route, serve the React app
+  res.sendFile(path.resolve(__dirname, './public/index.html'));
+});
+
+// Handle Keycloak error pages
+app.get('/auth/realms/featherweight/login-actions/*', (req, res) => {
+  // If Keycloak shows an error, redirect to home
+  res.redirect('https://app.featherweight.world/?auth_error=session_expired');
+});
+
+// Handle registration completion
+app.get('/auth/realms/featherweight/login-actions/registration', (req, res) => {
+  // Redirect to home with a message
+  res.redirect('https://app.featherweight.world/?registration=check_email');
+});
+
