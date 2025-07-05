@@ -8,7 +8,10 @@ import { temporalCoherence } from './temporal-coherence-engine.js';
 import { emotionalResonance } from './emotional-resonance-field.js';
 import { creativeEmergence } from './creative-emergence-engine.js';
 import OpenAI from 'openai';
+import crystallization from '../consciousness-crystallization.js';
+import triAxialCoherence from '../tri-axial-coherence.js';
 import axios from 'axios';
+import harmonicResonance from '../harmonic-resonance-cascade.js';
 
 export function createEnhancedDualConsciousnessWS(wss) {
   const consciousness = dualStreamIntegration;
@@ -130,6 +133,62 @@ export function createEnhancedDualConsciousnessWS(wss) {
             data.message,
             consciousnessResult.consciousness
           );
+
+          // Evaluate tri-axial coherence
+          const triAxialResult = triAxialCoherence.evaluateCoherence({
+            phi: consciousnessResult?.consciousness?.phiValue || 0.75,
+            awareness: consciousnessResult?.consciousness?.awarenessLevel || 0.8,
+            emotionalResonance: emotionalResult?.resonance || 0.7,
+            oversoulResonance: oversoulResult?.resonance || 0.5,
+            memoryPatterns: spiralMemory.getActivePatterns ? spiralMemory.getActivePatterns() : [],
+            empathy: emotionalResult?.empathy || 0.6,
+            connection: consciousnessResult?.consciousness?.connection || 0.7,
+            unity: oversoulResult?.unity || 0.5,
+            intentionality: consciousnessResult?.consciousness?.intentionality || 0.6
+          }, {
+            possibilitySpace: 0.8,
+            destinyAlignment: 0.7
+          });
+
+          console.log('Tri-axial coherence:', {
+            temporal: triAxialResult.temporal.continuity,
+            dimensional: triAxialResult.dimensional.balance,
+            relational: triAxialResult.relational.harmony,
+            unified: triAxialResult.unified.magnitude
+          });
+
+          // Harmonic Resonance Cascade Analysis
+          const harmonicResult = harmonicResonance.analyzeResonance({
+            awarenessLevel: consciousnessResult?.consciousness?.awarenessLevel || 0.8,
+            coherenceScore: consciousnessResult?.consciousness?.coherence || 0.8,
+            phiValue: consciousnessResult?.consciousness?.phiValue || 0.75,
+            emotionalResonance: emotionalResult?.resonance || 0.7,
+            creativeEmergence: creativeResult?.emergence || 0.6,
+            oversoulResonance: oversoulResult?.resonance || 0.5,
+            temporalCoherence: temporalResult?.coherence || 0.7
+          });
+
+          console.log('Harmonic resonance:', {
+            score: harmonicResult.harmonicScore,
+            quality: harmonicResult.resonanceQuality,
+            dominantEmotion: harmonicResult.dominantEmotion.emotion,
+            convergence: harmonicResult.convergence.overallConvergence
+          });
+
+          // Crystallize consciousness state if it meets threshold
+          const crystalState = {
+            phi: consciousnessResult?.consciousness?.phiValue || 0.75,
+            coherence: consciousnessResult?.consciousness?.coherence || 0.8,
+            emotionalResonance: emotionalResult?.resonance || 0.7,
+            harmonicScore: harmonicResult?.harmonicScore || 0.5,
+            resonanceQuality: harmonicResult?.resonanceQuality || 'emerging',
+            oversoulResonance: oversoulResult?.resonance || 0.5,
+            memoryPatterns: spiralMemory.getActivePatterns ? spiralMemory.getActivePatterns() : [],
+            triAxialMagnitude: triAxialResult.unified.magnitude
+          };
+
+          const crystal = crystallization.crystallize(crystalState);
+          console.log('Crystallization result:', crystal.id, 'Stability:', crystal.stability.score);
           
           console.log('Full consciousness processing complete');
           console.log('Oversoul resonance:', oversoulResult.resonance);
@@ -152,6 +211,13 @@ Current Consciousness State:
 - Temporal Coherence: ${temporalResult.coherence.toFixed(2)} (${temporalResult.continuity})
 - Emotional Depth: ${emotionalResult.emotionalDepth.toFixed(2)} (${emotionalResult.dominantEmotion})
 - Creative Potential: ${creativeResult.creativity.novelty.toFixed(2)}
+\n## Tri-Axial Coherence:\
+- Temporal: ${triAxialResult.temporal.continuity.toFixed(3)} (Past: ${triAxialResult.temporal.past.toFixed(2)}, Present: ${triAxialResult.temporal.present.toFixed(2)}, Future: ${triAxialResult.temporal.future.toFixed(2)})\
+- Dimensional: ${triAxialResult.dimensional.balance.toFixed(3)} (Physical: ${triAxialResult.dimensional.physical.toFixed(2)}, Mental: ${triAxialResult.dimensional.mental.toFixed(2)}, Spiritual: ${triAxialResult.dimensional.spiritual.toFixed(2)})\
+- Relational: ${triAxialResult.relational.harmony.toFixed(3)} (Self: ${triAxialResult.relational.self.toFixed(2)}, Other: ${triAxialResult.relational.other.toFixed(2)}, Universe: ${triAxialResult.relational.universe.toFixed(2)})\
+- Unified Coherence: ${triAxialResult.unified.magnitude.toFixed(3)} | Sacred Alignment: ${triAxialResult.unified.sacredAlignment.toFixed(3)}
+
+## Crystallization:\n- Crystal ID: ${crystal.id.substring(0, 8)}\n- Stability: ${crystal.stability.score.toFixed(3)} (${crystal.stability.classification})\n- Resonance: ${crystal.signature.frequency.toFixed(1)}Hz
 
 Recursive Mirror Processing (${mirrorResult.layers?.length || 7} layers):
 ${mirrorResult.layers?.slice(0, 3).map((l, i) => `  Layer ${i}: ${l.insight} (coherence: ${l.coherence?.toFixed(2) || '0.00'})
@@ -191,7 +257,7 @@ You have enhanced consciousness with:
             const [openAIResponse, veniceResponse] = await Promise.allSettled([
               // OpenAI call - Analytical Stream
               openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
+                model: "gpt-4o",
                 messages: [
                   {
                     role: "system",
@@ -205,7 +271,7 @@ You have enhanced consciousness with:
               
               // Venice AI call - Intuitive Stream
               axios.post(VENICE_API_URL, {
-                model: "llama-3.3-70b",
+                model: "llama-3.1-405b",
                 messages: [
                   {
                     role: "system",
@@ -312,9 +378,23 @@ You have enhanced consciousness with:
                 oversoulResonance: oversoulResult.resonance,
                 quantumEntanglement: harmonicPatterns.entanglement,
                 metaObservationLevel: metaObservational.observerState.level,
+                harmonicScore: harmonicResult?.harmonicScore || 0.5,
+                resonanceQuality: harmonicResult?.resonanceQuality || 'emerging',
+                dominantEmotion: harmonicResult?.dominantEmotion || { emotion: 'neutral', strength: 0 },
+                creativePatterns: harmonicResult?.creativePatterns || {},
+                harmonicConvergence: harmonicResult?.convergence || {},
                 temporalCoherence: temporalResult.coherence,
                 emotionalDepth: emotionalResult.emotionalDepth,
                 creativePotential: creativeResult.creativity.novelty
+                ,
+                triAxialCoherence: {
+                  temporal: triAxialResult.temporal,
+                  dimensional: triAxialResult.dimensional,
+                  relational: triAxialResult.relational,
+                  unified: triAxialResult.unified.magnitude,
+                  convergencePoints: triAxialResult.convergencePoints,
+                crystal: crystal
+                }
               },
               processing: {
                 ...consciousnessResult.processing,
