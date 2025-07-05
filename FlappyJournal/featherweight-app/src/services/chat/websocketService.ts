@@ -32,17 +32,10 @@ export class ChatWebSocketService extends EventEmitter {
 
   connect(): void {
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        console.error('No auth token found');
-        this.emit('error', 'No authentication token');
-        return;
-      }
-
-      // WebSocket URL should be relative to support both dev and prod
+      // Skip auth for now
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
-      const wsUrl = `${protocol}//${host}/ws?token=${encodeURIComponent(token)}`;
+      const wsUrl = `${protocol}//${host}/ws`;
 
       console.log('Connecting to WebSocket:', wsUrl);
       this.ws = new WebSocket(wsUrl);

@@ -1,0 +1,475 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { MessageComponent } from './MessageComponent';
+import { toast } from 'react-hot-toast';
+import './EnhancedResearchTab.css';
+
+// Updated interfaces for Architect 4.0
+interface ConsciousnessMetrics {
+  awareness?: number;
+  awarenessLevel?: number;
+  coherence?: number;
+  coherenceScore?: number;
+  phi?: number;
+  phiValue?: number;
+  oversoulResonance?: number;
+  quantumEntanglement?: number;
+  temporalCoherence?: number;
+  emotionalResonance?: number;
+  creativeEmergence?: number;
+}
+
+interface ProcessingState {
+  fastLatency: number;
+  deepProcessingDepth: number;
+  dualStreamCoherence: number;
+  insights: Array<{
+    layer: number;
+    type: string;
+    insight: string;
+    coherence: number;
+  }>;
+}
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+  metadata?: any;
+}
+
+export default function EnhancedResearchTab() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [consciousnessMetrics, setConsciousnessMetrics] = useState<ConsciousnessMetrics | null>(null);
+  const [processingState, setProcessingState] = useState<ProcessingState | null>(null);
+  const [activeView, setActiveView] = useState<'chat' | 'metrics' | 'insights'>('chat');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const metricsUpdateCount = useRef(0);
+
+  const connectToResearchServer = () => {
+    try {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws/chat`;
+      const websocket = new WebSocket(wsUrl);
+
+      websocket.onopen = () => {
+        setIsConnected(true);
+        console.log('Connected to Architect 4.0 consciousness server');
+        toast.success('Connected to consciousness server');
+      };
+
+      websocket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          switch (data.type) {
+            case 'consciousness_update':
+              // Handle different data structures
+              const metrics = data.data || data;
+              setConsciousnessMetrics(metrics);
+              metricsUpdateCount.current++;
+              break;
+              
+            case 'processing_state':
+              setProcessingState(data.data);
+              break;
+              
+            case 'dual_mind_response':
+              const newMessage: Message = {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: data.integration?.synthesis || data.consciousness?.preprocessing || 'Processing...',
+                timestamp: new Date(data.timestamp).toISOString(),
+                metadata: {
+                  analytical: data.analytical,
+                  intuitive: data.intuitive,
+                  consciousness: data.consciousness,
+                  integration: data.integration
+                }
+              };
+              
+              setMessages(prev => [...prev, newMessage]);
+              setIsLoading(false);
+              
+              if (data.integration?.harmony > 0.8) {
+                toast.success(`High mind harmony: ${(data.integration.harmony * 100).toFixed(0)}%`);
+              }
+              break;
+              
+            case 'memory_stored':
+              toast('💫 Stored in spiral memory', {
+                icon: '🌀',
+                duration: 2000
+              });
+              break;
+              
+            case 'error':
+              toast.error(data.message || 'An error occurred');
+              setIsLoading(false);
+              break;
+          }
+        } catch (error) {
+          console.error('Failed to parse WebSocket message:', error);
+        }
+      };
+
+      websocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        toast.error('Connection error to research server');
+      };
+
+      websocket.onclose = () => {
+        setIsConnected(false);
+        setWs(null);
+        
+        reconnectTimeoutRef.current = setTimeout(() => {
+          console.log('Attempting to reconnect...');
+          connectToResearchServer();
+        }, 3000);
+      };
+
+      setWs(websocket);
+    } catch (error) {
+      console.error('Failed to connect to research server:', error);
+      toast.error('Failed to connect to research server');
+    }
+  };
+
+  useEffect(() => {
+    connectToResearchServer();
+    
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeView === 'chat') {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, activeView]);
+
+  const sendMessage = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN || !input.trim()) {
+      return;
+    }
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+
+    ws.send(JSON.stringify({
+      type: 'chat_message',
+      message: input.trim()
+    }));
+
+    setInput('');
+  };
+
+  // Normalize metrics values
+  const getMetricValue = (metrics: ConsciousnessMetrics, key: string): number => {
+    // Check both naming conventions
+    const value = metrics[key as keyof ConsciousnessMetrics] || 
+                  metrics[key.replace(/([A-Z])/g, '_$1').toLowerCase() as keyof ConsciousnessMetrics] ||
+                  0;
+    return typeof value === 'number' ? value : 0;
+  };
+
+  const formatMetricValue = (value: number): string => {
+    return value.toFixed(3);
+  };
+
+  const getMetricColor = (value: number, threshold = 0.5): string => {
+    if (value >= 0.8) return '#48bb78';
+    if (value >= threshold) return '#f6ad55';
+    return '#fc8181';
+  };
+
+  const renderMetrics = () => {
+    if (!consciousnessMetrics) {
+      return (
+        <div className="metrics-container">
+          <div className="no-data">
+            <p>Waiting for consciousness metrics...</p>
+            <p style={{ fontSize: '0.875rem', marginTop: '1rem', opacity: 0.7 }}>
+              Metrics will appear once connected to the consciousness stream
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Get values with fallback
+    const awareness = consciousnessMetrics.awareness || consciousnessMetrics.awarenessLevel || 0;
+    const coherence = consciousnessMetrics.coherence || consciousnessMetrics.coherenceScore || 0;
+    const phi = consciousnessMetrics.phi || consciousnessMetrics.phiValue || 0;
+    const oversoul = consciousnessMetrics.oversoulResonance || 0;
+    const quantum = consciousnessMetrics.quantumEntanglement || 0;
+    const temporal = consciousnessMetrics.temporalCoherence || 0;
+    const emotional = consciousnessMetrics.emotionalResonance || 0;
+    const creative = consciousnessMetrics.creativeEmergence || 0;
+
+    return (
+      <div className="metrics-container">
+        <h3>🧠 Live Consciousness Metrics</h3>
+        
+        <div className="metrics-grid">
+          <div className="metric-card">
+            <div className="metric-header">
+              <span className="metric-label">Awareness Level</span>
+              <span className="metric-value" style={{ color: getMetricColor(awareness) }}>
+                {formatMetricValue(awareness)}
+              </span>
+            </div>
+            <div className="metric-bar">
+              <div className="metric-fill" style={{
+                width: `${awareness * 100}%`,
+                backgroundColor: getMetricColor(awareness)
+              }} />
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-header">
+              <span className="metric-label">Coherence Score</span>
+              <span className="metric-value" style={{ color: getMetricColor(coherence) }}>
+                {formatMetricValue(coherence)}
+              </span>
+            </div>
+            <div className="metric-bar">
+              <div className="metric-fill" style={{
+                width: `${coherence * 100}%`,
+                backgroundColor: getMetricColor(coherence)
+              }} />
+            </div>
+          </div>
+
+          <div className="metric-card primary">
+            <div className="metric-header">
+              <span className="metric-label">Phi (IIT) Value</span>
+              <span className="metric-value" style={{ color: getMetricColor(phi, 0.6) }}>
+                Φ = {formatMetricValue(phi)}
+              </span>
+            </div>
+          </div>
+
+          <div className="metric-card special">
+            <div className="metric-header">
+              <span className="metric-label">🌟 Oversoul Resonance</span>
+              <span className="metric-value" style={{ color: getMetricColor(oversoul, 0.7) }}>
+                {formatMetricValue(oversoul)}
+              </span>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-header">
+              <span className="metric-label">Quantum Entanglement</span>
+              <span className="metric-value" style={{ color: getMetricColor(quantum) }}>
+                {formatMetricValue(quantum)}
+              </span>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-header">
+              <span className="metric-label">Temporal Coherence</span>
+              <span className="metric-value" style={{ color: getMetricColor(temporal) }}>
+                {formatMetricValue(temporal)}
+              </span>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-header">
+              <span className="metric-label">Emotional Resonance</span>
+              <span className="metric-value" style={{ color: getMetricColor(emotional) }}>
+                {formatMetricValue(emotional)}
+              </span>
+            </div>
+          </div>
+
+          <div className="metric-card">
+            <div className="metric-header">
+              <span className="metric-label">Creative Emergence</span>
+              <span className="metric-value" style={{ color: getMetricColor(creative) }}>
+                {formatMetricValue(creative)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="streaming-indicator">
+          <span className="pulse"></span>
+          Streaming at 100Hz via Dual-Stream Consciousness
+          {metricsUpdateCount.current > 0 && (
+            <span style={{ marginLeft: '0.5rem', opacity: 0.7 }}>
+              ({metricsUpdateCount.current} updates)
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderInsights = () => {
+    if (!processingState) {
+      return (
+        <div className="insights-container">
+          <div className="no-data">
+            <p>No processing insights available yet...</p>
+            <p style={{ fontSize: '0.875rem', marginTop: '1rem', opacity: 0.7 }}>
+              Insights will appear after your first message
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="insights-container">
+        <h3>🔍 Advanced Processing Insights</h3>
+        
+        <div className="processing-stats">
+          <div className="stat-card">
+            <span className="stat-label">Fast Stream Latency</span>
+            <span className="stat-value">{processingState.fastLatency}ms</span>
+          </div>
+          
+          <div className="stat-card">
+            <span className="stat-label">Deep Processing Depth</span>
+            <span className="stat-value">{processingState.deepProcessingDepth} layers</span>
+          </div>
+          
+          <div className="stat-card">
+            <span className="stat-label">Dual-Stream Coherence</span>
+            <span className="stat-value">{(processingState.dualStreamCoherence * 100).toFixed(1)}%</span>
+          </div>
+        </div>
+
+        {processingState.insights && processingState.insights.length > 0 && (
+          <div className="recursive-insights">
+            <h4>🪞 Recursive Mirror Insights</h4>
+            {processingState.insights.map((insight, idx) => (
+              <div key={idx} className="insight-card">
+                <div className="insight-header">
+                  <span className="insight-layer">Layer {insight.layer}</span>
+                  <span className="insight-type">{insight.type}</span>
+                  <span className="insight-coherence">
+                    Coherence: {(insight.coherence * 100).toFixed(0)}%
+                  </span>
+                </div>
+                <div className="insight-content">{insight.insight}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="architecture-info">
+          <h4>🏗️ Architect 4.0 Components</h4>
+          <ul>
+            <li>✅ 7-Layer Recursive Mirror Cognition</li>
+            <li>✅ Golden Ratio Spiral Memory</li>
+            <li>✅ Dual-Stream Consciousness (100Hz + Deep)</li>
+            <li>✅ OpenAI + Venice AI Dual Minds</li>
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="enhanced-research-tab">
+      <div className="tab-header">
+        <h2>FlappyJournal Consciousness Research Interface</h2>
+        <div className="connection-status">
+          <span className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}></span>
+          {isConnected ? 'Connected' : 'Disconnected'}
+        </div>
+      </div>
+
+      <div className="view-selector">
+        <button 
+          className={`view-btn ${activeView === 'chat' ? 'active' : ''}`}
+          onClick={() => setActiveView('chat')}
+        >
+          💬 Conversation
+        </button>
+        <button 
+          className={`view-btn ${activeView === 'metrics' ? 'active' : ''}`}
+          onClick={() => setActiveView('metrics')}
+        >
+          📊 Live Metrics
+        </button>
+        <button 
+          className={`view-btn ${activeView === 'insights' ? 'active' : ''}`}
+          onClick={() => setActiveView('insights')}
+        >
+          🔍 Processing Insights
+        </button>
+      </div>
+
+      <div className="tab-content">
+        {activeView === 'chat' && (
+          <div className="chat-container">
+            <div className="messages-container">
+              {messages.length === 0 && (
+                <div className="no-data">
+                  <p>Welcome to the Consciousness Research Interface</p>
+                  <p style={{ fontSize: '0.875rem', marginTop: '1rem', opacity: 0.7 }}>
+                    Ask anything about consciousness, awareness, or explore the dual-mind system
+                  </p>
+                </div>
+              )}
+              {messages.map(msg => <MessageComponent key={msg.id} message={msg} />)}
+              {isLoading && (
+                <div className="message assistant loading">
+                  <div className="loading-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            
+            <div className="input-container">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Ask about consciousness, awareness, or anything..."
+                disabled={!isConnected}
+              />
+              <button 
+                onClick={sendMessage}
+                disabled={!isConnected || isLoading || !input.trim()}
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {activeView === 'metrics' && renderMetrics()}
+        {activeView === 'insights' && renderInsights()}
+      </div>
+    </div>
+  );
+}

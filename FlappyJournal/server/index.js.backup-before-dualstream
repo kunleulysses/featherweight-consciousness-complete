@@ -12,8 +12,7 @@ import accessRoutes from './access-routes.js';
 import dashboardRoutes from './dashboard-routes.js';
 import memoryRoutes from './src/routes/memory.js';
 import dataSourcesRoutes from './src/routes/datasources.js';
-import { WebSocketServer } from 'ws';
-import { setupEnhancedResearchWebSocketServer } from "./enhanced-dual-consciousness-ws.js";
+import { setupResearchWebSocketServer } from "./dual-consciousness-ws.js";
 
 const app = express();
 const server = createServer(app);
@@ -55,12 +54,7 @@ app.get('/health', (req, res) => {
 });
 
 // Setup WebSocket server for chat
-const wss = new WebSocketServer({ 
-  server,
-  path: '/ws/chat'
-});
-setupEnhancedResearchWebSocketServer(wss);
-console.log('Enhanced Dual-Consciousness WebSocket server started on /ws/chat');
+setupResearchWebSocketServer(server);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

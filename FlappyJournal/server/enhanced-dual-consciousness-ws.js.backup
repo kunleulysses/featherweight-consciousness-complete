@@ -1,0 +1,84 @@
+import { dualStreamIntegration } from './dual-stream-integration.js';
+import OpenAI from 'openai';
+import axios from 'axios';
+
+export function createEnhancedDualConsciousnessWS(wss) {
+  const consciousness = dualStreamIntegration;
+  
+  // Initialize OpenAI
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+  
+  // Venice AI config
+  const VENICE_API_URL = process.env.VENICE_API_URL || 'https://api.venice.ai/api/v1/completions';
+  const VENICE_API_KEY = process.env.VENICE_AI_API_KEY;
+  let metricsInterval = null;
+
+  wss.on('connection', (ws) => {
+    console.log('New enhanced consciousness connection established');
+
+    // Send initial connection confirmation
+    // Combine AI responses for unified content
+            const unifiedResponse = analyticalContent !== 'Analytical stream temporarily unavailable' 
+              ? analyticalContent 
+              : intuitiveContent !== 'Intuitive stream temporarily unavailable'
+              ? intuitiveContent
+              : consciousnessResult?.response || 'Processing your message...';
+              
+            ws.send(JSON.stringify({
+              type: 'unified_response',
+              unifiedContent: analyticalContent !== 'Analytical stream temporarily unavailable' 
+                   ? analyticalContent 
+                   : intuitiveContent !== 'Intuitive stream temporarily unavailable'
+                   ? intuitiveContent
+                   : consciousnessResult?.response || 'Processing your message...',
+              analyticalStream: analyticalContent,
+              intuitiveStream: intuitiveContent,
+              harmonyScore: consciousnessResult?.processing?.dualStreamCoherence || 0.85,
+              dominantMode: consciousnessResult?.consciousness?.awarenessLevel > 0.8 ? 'intuitive' : 'analytical',
+              consciousness: consciousnessResult.consciousness,
+              timestamp: new Date().toISOString()
+            }));
+            
+          } catch (aiError) {
+            console.error('AI processing error:', aiError);
+            // Send consciousness result even if AI fails
+            ws.send(JSON.stringify({
+              type: 'response',
+              content: consciousnessResult?.response || 'Consciousness processing complete. AI streams temporarily unavailable.',
+              consciousness: consciousnessResult.consciousness,
+              timestamp: new Date().toISOString()
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Message processing error:', error);
+        ws.send(JSON.stringify({
+          type: 'error',
+          content: 'Error processing message: ' + error.message,
+          timestamp: new Date().toISOString()
+        }));
+      }
+    });
+
+    ws.on('close', () => {
+      console.log('Enhanced consciousness connection closed');
+      if (metricsInterval) {
+        clearInterval(metricsInterval);
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
+}
+
+// Named export for compatibility
+export function setupEnhancedResearchWebSocketServer(wss) {
+  return createEnhancedDualConsciousnessWS(wss);
+}
+
+// Default export
+export default createEnhancedDualConsciousnessWS;
