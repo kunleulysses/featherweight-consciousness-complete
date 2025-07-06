@@ -1,3 +1,9 @@
+/* Georgia Font Family for Enhanced Research Tab */
+.enhanced-research-tab,
+.enhanced-research-tab * {
+  font-family: Georgia, serif;
+}
+
 /* Enhanced Research Tab Styles */
 
 .enhanced-research-tab {
@@ -181,20 +187,7 @@
   cursor: not-allowed;
 }
 
-.metrics-panel {
-  width: 300px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 1.5rem;
-  overflow-y: auto;
-}
 
-.metrics-panel h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.125rem;
-  color: #333;
-}
 
 .metric-item {
   margin-bottom: 1.5rem;

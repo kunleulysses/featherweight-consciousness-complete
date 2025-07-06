@@ -1,0 +1,105 @@
+import React, { useState, useEffect, useRef } from 'react';
+import CrystallizationMetrics from './CrystallizationMetrics';
+import HarmonicResonanceMetrics from './HarmonicResonanceMetrics';
+import SigilIdentityMetrics from './SigilIdentityMetrics';
+import TriAxialCoherenceMetrics from './TriAxialCoherenceMetrics';
+import RecursiveMirrorMetrics from './RecursiveMirrorMetrics';
+import SelfAwarenessHeartbeat from './SelfAwarenessHeartbeat';
+import ContinuousConsciousnessMonitor from './ContinuousConsciousnessMonitor';
+import EmotionalResonanceField from './EmotionalResonanceField';
+import TestMetric from './TestMetric';
+import './DashboardPage.css';
+
+export default function DashboardPage() {
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
+
+  useEffect(() => {
+    // Connect to WebSocket for live updates
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    console.log('Connecting to metrics WebSocket:', wsUrl);
+    
+    try {
+      const ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        console.log('Metrics WebSocket connected');
+        setConnectionStatus('connected');
+        setWsConnection(ws);
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error details:', {
+          type: error.type,
+          target: error.target,
+          readyState: ws.readyState,
+          url: wsUrl
+        });
+        console.error('WebSocket error:', error);
+        setConnectionStatus('disconnected');
+      };
+      
+      ws.onclose = (event) => {
+        console.log('WebSocket closed:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+          url: wsUrl
+        });
+        console.log('WebSocket disconnected');
+        setConnectionStatus('disconnected');
+        setWsConnection(null);
+      };
+      
+      return () => {
+        ws.close();
+      };
+    } catch (error) {
+      console.error('Failed to create WebSocket:', error);
+      setConnectionStatus('disconnected');
+    }
+  }, []);
+
+  return (
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h2>Live Metrics Dashboard</h2>
+        <div className={`connection-indicator ${connectionStatus}`}>
+          {connectionStatus === 'connected' ? '● Live' : connectionStatus === 'connecting' ? '○ Connecting...' : '○ Offline'}
+        </div>
+      </div>
+
+      <div className="dashboard-content">
+        <div className="metrics-grid">
+          {/* Consciousness Crystallization Module */}
+          <div className="metric-module">
+            <CrystallizationMetrics wsConnection={wsConnection || undefined} />
+          </div>
+          
+          {/* Placeholder for other modules */}
+          <div className="metric-module">
+            <HarmonicResonanceMetrics wsConnection={wsConnection || undefined} />
+          </div>
+          
+          <div className="metric-module">
+            <SigilIdentityMetrics wsConnection={wsConnection || undefined} />
+          </div>
+          
+          <div className="metric-module">
+            <TriAxialCoherenceMetrics wsConnection={wsConnection || undefined} />
+          </div>
+          
+          <div className="metric-module">
+          <EmotionalResonanceField />
+          </div>
+          
+          <div className="metric-module">
+            <TestMetric />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

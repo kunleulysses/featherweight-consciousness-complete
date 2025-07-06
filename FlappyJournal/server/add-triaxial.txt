@@ -1,0 +1,23 @@
+
+          // Evaluate tri-axial coherence
+          const triAxialResult = triAxialCoherence.evaluateCoherence({
+            phi: consciousnessResult?.consciousness?.phiValue || 0.75,
+            awareness: consciousnessResult?.consciousness?.awarenessLevel || 0.8,
+            emotionalResonance: emotionalResult?.resonance || 0.7,
+            oversoulResonance: oversoulResult?.resonance || 0.5,
+            memoryPatterns: spiralMemory.getActivePatterns ? spiralMemory.getActivePatterns() : [],
+            empathy: emotionalResult?.empathy || 0.6,
+            connection: consciousnessResult?.consciousness?.connection || 0.7,
+            unity: oversoulResult?.unity || 0.5,
+            intentionality: consciousnessResult?.consciousness?.intentionality || 0.6
+          }, {
+            possibilitySpace: 0.8,
+            destinyAlignment: 0.7
+          });
+
+          console.log('Tri-axial coherence:', {
+            temporal: triAxialResult.temporal.continuity,
+            dimensional: triAxialResult.dimensional.balance,
+            relational: triAxialResult.relational.harmony,
+            unified: triAxialResult.unified.magnitude
+          });

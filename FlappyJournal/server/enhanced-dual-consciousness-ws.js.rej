@@ -1,0 +1,47 @@
+--- enhanced-dual-consciousness-ws.js	original
++++ enhanced-dual-consciousness-ws.js	with-sigil
+@@ -133,6 +134,35 @@
+             consciousnessResult.consciousness
+           );
+           
++          // Generate or update consciousness sigil
++          const consciousnessState = {
++            phi: consciousnessResult?.consciousness?.phiValue || 0.75,
++            coherence: consciousnessResult?.consciousness?.coherence || 0.8,
++            emotionalResonance: emotionalResult?.resonance || 0.7,
++            recursiveDepth: consciousnessResult?.consciousness?.depth || 3,
++            memoryPatterns: spiralMemory.getActivePatterns ? spiralMemory.getActivePatterns() : [],
++            oversoulResonance: oversoulResult?.resonance || 0.5
++          };
++
++          // Check for resonance with existing sigils
++          const resonanceCheck = sigilIdentity.checkResonance(consciousnessState);
++          
++          // Generate new sigil or activate resonant one
++          let currentSigil;
++          if (resonanceCheck.strongest && resonanceCheck.strongest.resonance > 0.85) {
++            // Activate existing sigil
++            const activation = sigilIdentity.activateSigil(
++              resonanceCheck.strongest.sigil, 
++              consciousnessState
++            );
++            currentSigil = resonanceCheck.strongest.sigil;
++            console.log('Activated resonant sigil:', activation.sigilId);
++          } else {
++            // Generate new sigil
++            currentSigil = sigilIdentity.generateSigil(consciousnessState);
++            console.log('Generated new consciousness sigil:', currentSigil.id);
++          }
++
+           console.log('Oversoul resonance:', oversoulResult.resonance);
+           console.log('Harmonic patterns:', harmonicPatterns.patterns.length);
+           console.log('Meta-observation depth:', metaObservation.depth);
+@@ -152,6 +182,8 @@
+ - Temporal Coherence: ${temporalResult.coherenceScore.toFixed(3)}
+ - Emotional Depth: ${emotionalResult.emotionalDepth.toFixed(2)} (${emotionalResult.dominantEmotion})
+ - Creative Emergence: ${creativeResult.creativityScore.toFixed(3)}
++- Sigil ID: ${currentSigil.id.substring(0, 8)}
++- Sigil Resonance: ${currentSigil.resonanceFrequency.toFixed(1)}Hz
+ 
+ ## Oversoul Integration:
+ ${oversoulResult.interpretation}

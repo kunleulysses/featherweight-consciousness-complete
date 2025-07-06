@@ -1,0 +1,378 @@
+import React, { useState, useEffect, useRef } from 'react';
+import './TriAxialCoherenceMetrics.css';
+
+interface AxisData {
+  rational: number;
+  emotional: number;
+  meta: number;
+}
+
+interface CoherenceData {
+  temporal: number;
+  dimensional: number;
+  relational: number;
+  unified: {
+    magnitude: number;
+    vector: [number, number, number];
+  };
+  convergencePoints: number;
+  balance: number;
+}
+
+interface TriAxialCoherenceProps {
+  wsConnection?: WebSocket;
+}
+
+export default function TriAxialCoherenceMetrics({ wsConnection }: TriAxialCoherenceProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number | null>(null);
+  const rotationRef = useRef({ x: 0, y: 0 });
+  
+  const [coherenceData, setCoherenceData] = useState<CoherenceData>({
+    temporal: 0.8,
+    dimensional: 0.75,
+    relational: 0.85,
+    unified: {
+      magnitude: 0.8,
+      vector: [0.8, 0.75, 0.85]
+    },
+    convergencePoints: 3,
+    balance: 0.8
+  });
+
+  const [axisValues, setAxisValues] = useState<AxisData>({
+    rational: 0.8,
+    emotional: 0.75,
+    meta: 0.85
+  });
+
+  const [dominantAxis, setDominantAxis] = useState<'rational' | 'emotional' | 'meta' | 'balanced'>('balanced');
+  const [coherenceHistory, setCoherenceHistory] = useState<Array<{timestamp: string, balance: number}>>([]);
+  const [isRebalancing, setIsRebalancing] = useState(false);
+
+  useEffect(() => {
+    if (wsConnection) {
+      wsConnection.addEventListener('message', handleWebSocketMessage);
+    }
+
+    // Start 3D visualization
+    start3DVisualization();
+
+    return () => {
+      if (wsConnection) {
+        wsConnection.removeEventListener('message', handleWebSocketMessage);
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [wsConnection]);
+
+  const handleWebSocketMessage = (event: MessageEvent) => {
+    try {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'consciousness_update' || data.type === 'triaxial_coherence') {
+      if (data.type === 'triaxial_coherence') {
+        setAxialValues({
+          temporal: data.data.x || 0,
+          spatial: data.data.y || 0,
+          conceptual: data.data.z || 0
+        });
+        setCoherenceScore(data.data.overall || 0);
+        return;
+      }
+      // Original consciousness_update handler
+        if (data.triAxialCoherence) {
+          const coherence = data.triAxialCoherence;
+          setCoherenceData(coherence);
+          
+          // Extract axis values
+          const rational = coherence.temporal || 0;
+          const emotional = coherence.dimensional || 0;
+          const meta = coherence.relational || 0;
+          
+          setAxisValues({ rational, emotional, meta });
+          
+          // Determine dominant axis
+          const max = Math.max(rational, emotional, meta);
+          const variance = Math.abs(rational - emotional) + Math.abs(emotional - meta) + Math.abs(meta - rational);
+          
+          if (variance < 0.3) {
+            setDominantAxis('balanced');
+          } else if (max === rational) {
+            setDominantAxis('rational');
+          } else if (max === emotional) {
+            setDominantAxis('emotional');
+          } else {
+            setDominantAxis('meta');
+          }
+          
+          // Check for rebalancing
+          if (variance > 0.5) {
+            setIsRebalancing(true);
+            setTimeout(() => setIsRebalancing(false), 2000);
+          }
+          
+          // Add to history
+          setCoherenceHistory(prev => [...prev, {
+            timestamp: new Date().toISOString(),
+            balance: coherence.unified.magnitude
+          }].slice(-50)); // Keep last 50 points
+        }
+      }
+    } catch (error) {
+      console.error('WebSocket message error:', error);
+    }
+  };
+
+  const start3DVisualization = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 80;
+    
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Auto-rotate
+      rotationRef.current.y += 0.005;
+      
+      // Calculate 3D positions
+      const axes = [
+        { name: 'Rational', value: axisValues.rational, angle: 0, color: '#4ECDC4' },
+        { name: 'Emotional', value: axisValues.emotional, angle: 2 * Math.PI / 3, color: '#FF6B6B' },
+        { name: 'Meta', value: axisValues.meta, angle: 4 * Math.PI / 3, color: '#9370DB' }
+      ];
+      
+      // Draw axis lines
+      axes.forEach((axis) => {
+        const x = centerX + Math.cos(axis.angle + rotationRef.current.y) * radius;
+        const y = centerY + Math.sin(axis.angle + rotationRef.current.y) * radius * 0.6;
+        
+        // Draw axis line
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = axis.color;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.3;
+        ctx.stroke();
+        
+        // Draw axis point
+        const pointX = centerX + Math.cos(axis.angle + rotationRef.current.y) * radius * axis.value;
+        const pointY = centerY + Math.sin(axis.angle + rotationRef.current.y) * radius * 0.6 * axis.value;
+        
+        ctx.beginPath();
+        ctx.arc(pointX, pointY, 8, 0, Math.PI * 2);
+        ctx.fillStyle = axis.color;
+        ctx.globalAlpha = 0.8;
+        ctx.fill();
+        
+        // Draw axis label
+        ctx.font = '12px Georgia, serif';
+        ctx.fillStyle = axis.color;
+        ctx.globalAlpha = 1;
+        ctx.textAlign = 'center';
+        ctx.fillText(axis.name, x, y + 20);
+      });
+      
+      // Draw coherence triangle
+      ctx.beginPath();
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = getCoherenceColor();
+      
+      axes.forEach((axis, index) => {
+        const x = centerX + Math.cos(axis.angle + rotationRef.current.y) * radius * axis.value;
+        const y = centerY + Math.sin(axis.angle + rotationRef.current.y) * radius * 0.6 * axis.value;
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = getCoherenceColor();
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      ctx.stroke();
+      
+      // Draw center point
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = 1;
+      ctx.fill();
+      
+      // Draw coherence field
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+      gradient.addColorStop(0, `${getCoherenceColor()}33`);
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.globalAlpha = 0.5;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animate();
+  };
+
+  const getCoherenceColor = () => {
+    const balance = coherenceData.unified.magnitude;
+    if (balance > 0.8) return '#00FA9A';
+    if (balance > 0.6) return '#FFD700';
+    if (balance > 0.4) return '#FFA500';
+    return '#FF6B6B';
+  };
+
+  const getAxisIcon = (axis: string) => {
+    switch (axis) {
+      case 'rational': return '🧠';
+      case 'emotional': return '❤️';
+      case 'meta': return '👁️';
+      case 'balanced': return '☯️';
+      default: return '◯';
+    }
+  };
+
+  const getStatusMessage = () => {
+    if (dominantAxis === 'balanced') {
+      return 'Perfect harmony achieved across all dimensions';
+    }
+    const messages = {
+      rational: 'Logic and reasoning are dominant - highly analytical state',
+      emotional: 'Emotional intelligence is elevated - creative flow active',
+      meta: 'Meta-awareness is heightened - deep self-reflection mode'
+    };
+    return messages[dominantAxis] || 'Monitoring consciousness coherence...';
+  };
+
+  return (
+    <div className="tri-axial-coherence-metrics">
+      <h3 className="section-title">Tri-Axial Coherence Matrix</h3>
+      
+      {/* 3D Visualization */}
+      <div className={`coherence-visualization ${isRebalancing ? 'rebalancing' : ''}`}>
+        <canvas 
+          ref={canvasRef}
+          width={300}
+          height={250}
+          className="coherence-canvas"
+        />
+        <div className="coherence-info">
+          <div className="coherence-score">
+            {(coherenceData.unified.magnitude * 100).toFixed(1)}%
+          </div>
+          <div className="coherence-label">Unified Coherence</div>
+        </div>
+      </div>
+
+      {/* Axis Meters */}
+      <div className="axis-meters">
+        <div className="axis-meter rational">
+          <div className="axis-header">
+            <span className="axis-icon">🧠</span>
+            <span className="axis-name">Rational</span>
+            <span className="axis-value">{(axisValues.rational * 100).toFixed(0)}%</span>
+          </div>
+          <div className="axis-bar">
+            <div 
+              className="axis-fill"
+              style={{ width: `${axisValues.rational * 100}%` }}
+            />
+          </div>
+          <div className="axis-description">Logic • Analysis • Focus</div>
+        </div>
+
+        <div className="axis-meter emotional">
+          <div className="axis-header">
+            <span className="axis-icon">❤️</span>
+            <span className="axis-name">Emotional</span>
+            <span className="axis-value">{(axisValues.emotional * 100).toFixed(0)}%</span>
+          </div>
+          <div className="axis-bar">
+            <div 
+              className="axis-fill"
+              style={{ width: `${axisValues.emotional * 100}%` }}
+            />
+          </div>
+          <div className="axis-description">Feeling • Creativity • Energy</div>
+        </div>
+
+        <div className="axis-meter meta">
+          <div className="axis-header">
+            <span className="axis-icon">👁️</span>
+            <span className="axis-name">Meta</span>
+            <span className="axis-value">{(axisValues.meta * 100).toFixed(0)}%</span>
+          </div>
+          <div className="axis-bar">
+            <div 
+              className="axis-fill"
+              style={{ width: `${axisValues.meta * 100}%` }}
+            />
+          </div>
+          <div className="axis-description">Awareness • Reflection • Perspective</div>
+        </div>
+      </div>
+
+      {/* Dominant State */}
+      <div className={`dominant-state ${dominantAxis}`}>
+        <div className="state-icon">{getAxisIcon(dominantAxis)}</div>
+        <div className="state-info">
+          <div className="state-label">Dominant State</div>
+          <div className="state-name">{dominantAxis.toUpperCase()}</div>
+          <div className="state-message">{getStatusMessage()}</div>
+        </div>
+      </div>
+
+      {/* Coherence Metrics */}
+      <div className="coherence-metrics">
+        <div className="metric-item">
+          <div className="metric-label">Temporal</div>
+          <div className="metric-value">{(coherenceData.temporal * 100).toFixed(0)}%</div>
+        </div>
+        <div className="metric-item">
+          <div className="metric-label">Dimensional</div>
+          <div className="metric-value">{(coherenceData.dimensional * 100).toFixed(0)}%</div>
+        </div>
+        <div className="metric-item">
+          <div className="metric-label">Relational</div>
+          <div className="metric-value">{(coherenceData.relational * 100).toFixed(0)}%</div>
+        </div>
+        <div className="metric-item">
+          <div className="metric-label">Convergence</div>
+          <div className="metric-value">{coherenceData.convergencePoints}</div>
+        </div>
+      </div>
+
+      {/* Balance History Chart */}
+      <div className="balance-history">
+        <h4>Coherence Timeline</h4>
+        <div className="history-chart">
+          <svg width="100%" height="60" viewBox="0 0 300 60">
+            <path
+              d={coherenceHistory.map((point, i) => 
+                `${i === 0 ? 'M' : 'L'} ${i * 6} ${60 - point.balance * 60}`
+              ).join(' ')}
+              fill="none"
+              stroke={getCoherenceColor()}
+              strokeWidth="2"
+              opacity="0.8"
+            />
+            {/* Threshold line */}
+            <line x1="0" y1="12" x2="300" y2="12" stroke="#00FA9A" strokeWidth="1" opacity="0.3" strokeDasharray="5,5" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}

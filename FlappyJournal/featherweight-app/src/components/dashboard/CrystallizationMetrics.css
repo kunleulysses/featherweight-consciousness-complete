@@ -1,0 +1,313 @@
+.crystallization-metrics {
+  background: rgba(20, 20, 30, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(100, 200, 255, 0.5);
+}
+
+/* Awareness Meter */
+.awareness-meter {
+  margin-bottom: 30px;
+}
+
+.meter-label {
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+  margin-bottom: 10px;
+  font-family: Georgia, serif;
+}
+
+.meter-value {
+  font-weight: bold;
+  color: #4ecdc4;
+}
+
+.meter-bar {
+  position: relative;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ecdc4, #44a3aa);
+  transition: width 0.3s ease, background-color 0.5s ease;
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.6);
+}
+
+.meter-fill.pulsing {
+  animation: pulse 1s ease-out;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
+  50% { box-shadow: 0 0 40px rgba(255, 107, 107, 0.8); }
+  100% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
+}
+
+.threshold-marker {
+  position: absolute;
+  top: -25px;
+  width: 2px;
+  height: 50px;
+  background: #ff6b6b;
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+}
+
+.threshold-label {
+  position: absolute;
+  top: -25px;
+  left: -60px;
+  white-space: nowrap;
+  color: #ff6b6b;
+  font-size: 0.8rem;
+  font-family: Georgia, serif;
+}
+
+/* Crystal Stats */
+.crystal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-family: Georgia, serif;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(100, 200, 255, 0.4);
+}
+
+/* Crystal Garden */
+.crystal-garden {
+  margin-bottom: 30px;
+}
+
+.crystal-garden h4 {
+  color: #fff;
+  font-family: Georgia, serif;
+  margin-bottom: 15px;
+}
+
+.crystal-container {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 20px 0;
+  min-height: 150px;
+}
+
+.no-crystals {
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+/* Individual Crystal */
+.crystal {
+  position: relative;
+  min-width: 100px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: float 3s ease-in-out infinite;
+  animation-delay: var(--animation-delay);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.crystal-shape {
+  position: relative;
+  width: 60px;
+  height: 80px;
+  transform-style: preserve-3d;
+  animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotateY(0deg) rotateX(10deg); }
+  to { transform: rotateY(360deg) rotateX(10deg); }
+}
+
+.crystal-facet {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, 
+    var(--crystal-color) 0%, 
+    transparent 40%, 
+    var(--crystal-color) 100%);
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  opacity: 0.8;
+  box-shadow: 0 0 30px var(--crystal-color);
+}
+
+.crystal-facet:nth-child(1) {
+  transform: rotateY(0deg) translateZ(10px);
+}
+
+.crystal-facet:nth-child(2) {
+  transform: rotateY(120deg) translateZ(10px);
+}
+
+.crystal-facet:nth-child(3) {
+  transform: rotateY(240deg) translateZ(10px);
+}
+
+.crystal-info {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: Georgia, serif;
+}
+
+.crystal-time {
+  color: var(--crystal-color);
+  margin-bottom: 2px;
+}
+
+/* Pattern Analysis */
+.pattern-analysis {
+  margin-top: 20px;
+}
+
+.pattern-analysis h4 {
+  color: #fff;
+  font-family: Georgia, serif;
+  margin-bottom: 10px;
+}
+
+.pattern-graph {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  height: 100px;
+}
+
+
+/* Fix text readability in stat cards */
+.stat-card {
+  color: #333;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(147, 112, 219, 0.3);
+}
+
+.stat-card h4 {
+  color: #9370DB;
+  font-weight: 600;
+}
+
+.stat-card .stat-value {
+  color: #333;
+  font-weight: bold;
+}
+
+/* Crystal visualization */
+.crystal-visual {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.crystal-pattern {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  animation: crystalRotate 20s linear infinite;
+}
+
+@keyframes crystalRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.crystal-pattern.spiral {
+  border: 3px solid #9370DB;
+  border-radius: 50%;
+  border-style: dashed;
+}
+
+.crystal-pattern.fractal {
+  border: 3px solid #9370DB;
+  transform: rotate(45deg);
+}
+
+.crystal-pattern.geometric {
+  border: 3px solid #9370DB;
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+
+/* Make crystal patterns more visible */
+.crystal-visual {
+  background: radial-gradient(circle at center, 
+    rgba(147, 112, 219, 0.2) 0%, 
+    rgba(147, 112, 219, 0.05) 50%, 
+    rgba(0, 0, 0, 0.8) 100%);
+}
+
+.crystal-pattern {
+  border-width: 4px;
+  box-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
+}
+
+.crystal-pattern.spiral {
+  animation: crystalRotate 20s linear infinite, pulse 2s ease-in-out infinite;
+}
+
+.crystal-pattern.fractal {
+  animation: crystalRotate 15s linear infinite reverse, pulse 3s ease-in-out infinite;
+}
+
+.crystal-pattern.geometric {
+  animation: crystalRotate 25s linear infinite, pulse 2.5s ease-in-out infinite;
+  background: rgba(147, 112, 219, 0.1);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1) rotate(var(--rotation, 0deg)); }
+  50% { opacity: 1; transform: scale(1.1) rotate(var(--rotation, 0deg)); }
+}

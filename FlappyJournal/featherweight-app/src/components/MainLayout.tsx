@@ -17,7 +17,7 @@ export default function MainLayout() {
               className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
               onClick={() => setActiveTab('dashboard')}
             >
-              Dashboard
+              Live Metrics Dashboard
             </button>
             <button
               className={`tab-button ${activeTab === 'research' ? 'active' : ''}`}

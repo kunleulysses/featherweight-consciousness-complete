@@ -1,8 +1,8 @@
 import React from 'react';
-import FlappyConsciousnessChat from '../../components/chat/FlappyConsciousnessChat';
+import { EnhancedFlappyChat } from '../../components/chat';
 
 const ChatPage: React.FC = () => {
-  return <FlappyConsciousnessChat />;
+  return <EnhancedFlappyChat />;
 };
 
 export default ChatPage;

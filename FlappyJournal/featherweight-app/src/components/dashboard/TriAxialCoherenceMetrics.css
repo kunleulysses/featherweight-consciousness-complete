@@ -1,0 +1,338 @@
+.tri-axial-coherence-metrics {
+  background: rgba(20, 20, 30, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+}
+
+/* 3D Visualization */
+.coherence-visualization {
+  position: relative;
+  margin-bottom: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.coherence-visualization.rebalancing {
+  animation: rebalance 2s ease-out;
+}
+
+@keyframes rebalance {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(0.95) rotate(-5deg); }
+  50% { transform: scale(1.05) rotate(5deg); }
+  75% { transform: scale(0.98) rotate(-2deg); }
+}
+
+.coherence-canvas {
+  background: radial-gradient(ellipse at center, 
+    rgba(20, 20, 40, 0.9) 0%, 
+    rgba(10, 10, 20, 1) 100%);
+  border-radius: 12px;
+  box-shadow: 
+    0 0 30px rgba(78, 205, 196, 0.2),
+    inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.coherence-info {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.coherence-score {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(78, 205, 196, 0.6);
+}
+
+.coherence-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: Georgia, serif;
+}
+
+/* Axis Meters */
+.axis-meters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.axis-meter {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.axis-meter:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.axis-meter.rational {
+  border-color: rgba(78, 205, 196, 0.3);
+}
+
+.axis-meter.emotional {
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.axis-meter.meta {
+  border-color: rgba(147, 112, 219, 0.3);
+}
+
+.axis-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.axis-icon {
+  font-size: 1.2rem;
+}
+
+.axis-name {
+  flex: 1;
+  color: #fff;
+  font-weight: bold;
+  font-family: Georgia, serif;
+}
+
+.axis-value {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.axis-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.axis-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.axis-meter.rational .axis-fill {
+  background: linear-gradient(90deg, #4ECDC4, #44A3AA);
+  box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+}
+
+.axis-meter.emotional .axis-fill {
+  background: linear-gradient(90deg, #FF6B6B, #FF8E8E);
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+.axis-meter.meta .axis-fill {
+  background: linear-gradient(90deg, #9370DB, #B19CD9);
+  box-shadow: 0 0 10px rgba(147, 112, 219, 0.5);
+}
+
+.axis-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+.axis-description {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: Georgia, serif;
+}
+
+/* Dominant State */
+.dominant-state {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 2px solid;
+  transition: all 0.3s ease;
+}
+
+.dominant-state.balanced {
+  border-color: rgba(0, 250, 154, 0.3);
+  background: rgba(0, 250, 154, 0.05);
+}
+
+.dominant-state.rational {
+  border-color: rgba(78, 205, 196, 0.3);
+  background: rgba(78, 205, 196, 0.05);
+}
+
+.dominant-state.emotional {
+  border-color: rgba(255, 107, 107, 0.3);
+  background: rgba(255, 107, 107, 0.05);
+}
+
+.dominant-state.meta {
+  border-color: rgba(147, 112, 219, 0.3);
+  background: rgba(147, 112, 219, 0.05);
+}
+
+.state-icon {
+  font-size: 3rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.state-info {
+  flex: 1;
+}
+
+.state-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: Georgia, serif;
+}
+
+.state-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 5px 0;
+  letter-spacing: 2px;
+}
+
+.state-message {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: Georgia, serif;
+  line-height: 1.4;
+}
+
+/* Coherence Metrics */
+.coherence-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.metric-item {
+  text-align: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: Georgia, serif;
+  margin-bottom: 5px;
+}
+
+.metric-value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #4ECDC4;
+}
+
+/* Balance History */
+.balance-history {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.balance-history h4 {
+  color: #fff;
+  font-family: Georgia, serif;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.history-chart {
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.history-chart svg {
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .axis-meters {
+    grid-template-columns: 1fr;
+  }
+  
+  .coherence-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dominant-state {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Balance Trend Styles */
+.history-graph {
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.history-bar {
+  flex: 1;
+  background: #9370DB;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.3s ease;
+  min-height: 2px;
+}
+
+.balance-metrics h4 {
+  color: #9370DB;
+  margin-bottom: 15px;
+}
+
+/* Dominant Axis Highlighting */
+.stat-item .stat-value {
+  font-weight: bold;
+  transition: color 0.3s ease;
+}

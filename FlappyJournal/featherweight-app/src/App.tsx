@@ -1,30 +1,50 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import MainLayout from './components/MainLayout';
+import React, { useState } from 'react';
+import { MetricsProvider } from './contexts/MetricsContext';
+import { ChatProvider } from './contexts/ChatContext';
+import ResearchTab from './components/research/ResearchTab';
+import DashboardPage from './components/dashboard/DashboardPage';
+import UnifiedConsciousnessDashboard from './components/dashboard/UnifiedConsciousnessDashboard';
 import './App.css';
 
 function App() {
+  const [activeTab, setActiveTab] = useState<'research' | 'metrics' | 'consciousness'>('research');
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MainLayout />} />
-        <Route path="/journal" element={<MainLayout />} />
-        <Route path="/chat" element={<MainLayout />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: 'rgba(15, 23, 42, 0.9)',
-            color: '#e2e8f0',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
-          },
-        }}
-      />
-    </Router>
+    <MetricsProvider>
+      <ChatProvider>
+        <div className="App">
+          <header className="App-header">
+            <h1>FlappyJournal</h1>
+            <div className="tab-navigation">
+              <button 
+                className={activeTab === 'research' ? 'active' : ''} 
+                onClick={() => setActiveTab('research')}
+              >
+                Research
+              </button>
+              <button 
+                className={activeTab === 'metrics' ? 'active' : ''} 
+                onClick={() => setActiveTab('metrics')}
+              >
+                Live Metrics
+              </button>
+              <button 
+                className={activeTab === 'consciousness' ? 'active' : ''} 
+                onClick={() => setActiveTab('consciousness')}
+              >
+                Consciousness System
+              </button>
+            </div>
+          </header>
+          
+          <main className="App-main">
+            {activeTab === 'research' && <ResearchTab />}
+            {activeTab === 'metrics' && <DashboardPage />}
+            {activeTab === 'consciousness' && <UnifiedConsciousnessDashboard />}
+          </main>
+        </div>
+      </ChatProvider>
+    </MetricsProvider>
   );
 }
 

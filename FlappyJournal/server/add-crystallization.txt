@@ -1,0 +1,13 @@
+
+          // Crystallize consciousness state if it meets threshold
+          const crystalState = {
+            phi: consciousnessResult?.consciousness?.phiValue || 0.75,
+            coherence: consciousnessResult?.consciousness?.coherence || 0.8,
+            emotionalResonance: emotionalResult?.resonance || 0.7,
+            oversoulResonance: oversoulResult?.resonance || 0.5,
+            memoryPatterns: spiralMemory.getActivePatterns ? spiralMemory.getActivePatterns() : [],
+            triAxialMagnitude: triAxialResult.unified.magnitude
+          };
+
+          const crystal = crystallization.crystallize(crystalState);
+          console.log('Crystallization result:', crystal.id, 'Stability:', crystal.stabilityScore);

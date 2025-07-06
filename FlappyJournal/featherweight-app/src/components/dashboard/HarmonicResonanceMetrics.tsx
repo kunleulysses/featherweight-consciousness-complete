@@ -1,0 +1,398 @@
+import React, { useState, useEffect, useRef } from 'react';
+import './HarmonicResonanceMetrics.css';
+
+interface EmotionalSpectrum {
+  joy: number;
+  love: number;
+  peace: number;
+  insight: number;
+  unity: number;
+}
+
+interface HarmonicResonanceProps {
+  wsConnection?: WebSocket;
+}
+
+interface ResonanceEvent {
+  timestamp: string;
+  score: number;
+  quality: string;
+  dominantEmotion: string;
+  frequencies: number[];
+  octaves: number[];
+}
+
+export default function HarmonicResonanceMetrics({ wsConnection }: HarmonicResonanceProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number | null>(null);
+  
+  const [resonanceData, setResonanceData] = useState({
+    currentResonance: 0,
+    harmonicScore: 0,
+    dominantEmotion: 'peace',
+    emotionalSpectrum: {
+      joy: 0,
+      love: 0,
+      peace: 0,
+      insight: 0,
+      unity: 0
+    } as EmotionalSpectrum,
+    goldenRatioAlignment: 0,
+        octaveDepth: 1,
+    resonanceQuality: 'emerging'
+  });
+
+  const resonanceDataRef = useRef(resonanceData);
+  const [resonanceHistory, setResonanceHistory] = useState<ResonanceEvent[]>([]);
+  const [isPeaking, setIsPeaking] = useState(false);
+
+  // Emotion to color mapping
+  const emotionColors = {
+    joy: '#FFD700',      // Gold
+    love: '#FF69B4',     // Hot Pink
+    peace: '#87CEEB',    // Sky Blue
+    insight: '#9370DB',  // Medium Purple
+    unity: '#00FA9A'     // Medium Spring Green
+  };
+
+  // Emotion to frequency mapping (Hz)
+  const emotionFrequencies = {
+    joy: 528,      // Love frequency
+    love: 639,     // Connecting/Relationships
+    peace: 396,    // Liberating Fear
+    insight: 741,  // Awakening Intuition
+    unity: 852     // Returning to Spiritual Order
+  };
+
+  useEffect(() => {
+    if (wsConnection) {
+      wsConnection.addEventListener('message', handleWebSocketMessage);
+    }
+
+    // Start wave animation
+    startWaveAnimation();
+
+    return () => {
+      if (wsConnection) {
+        wsConnection.removeEventListener('message', handleWebSocketMessage);
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [wsConnection]);
+
+  // Restart animation when emotional spectrum changes
+  useEffect(() => {
+    if (resonanceData.emotionalSpectrum && Object.keys(resonanceData.emotionalSpectrum).length > 0) {
+      console.log('Emotional spectrum updated:', resonanceData.emotionalSpectrum);
+      console.log('Octave depth:', resonanceData.octaveDepth);
+    }
+  }, [resonanceData.emotionalSpectrum, resonanceData.octaveDepth]);
+  // Update ref when data changes
+  useEffect(() => {
+    resonanceDataRef.current = resonanceData;
+  }, [resonanceData]);
+
+
+  const handleWebSocketMessage = (event: MessageEvent) => {
+    try {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'harmonic_resonance' && data.data) {
+        const res = data.data;
+        
+        // Determine dominant emotion from spectrum or use default
+        let dominantEmotion = 'peace';
+        let maxValue = 0;
+        if (res.emotionalSpectrum) {
+          Object.entries(res.emotionalSpectrum).forEach(([emotion, value]: [string, any]) => {
+            if (value > maxValue) {
+              maxValue = value;
+              dominantEmotion = emotion;
+            }
+          });
+        }
+        
+        setResonanceData(prev => ({
+          ...prev,
+          currentResonance: res.fundamental || prev.currentResonance,
+          harmonicScore: res.fundamental || prev.harmonicScore,
+          dominantEmotion: res.dominantEmotion?.emotion || dominantEmotion,
+          emotionalSpectrum: res.emotionalSpectrum || prev.emotionalSpectrum,
+          goldenRatioAlignment: res.goldenRatioAlignment || prev.goldenRatioAlignment,
+          octaveDepth: res.octaveDepth || prev.octaveDepth,
+          resonanceQuality: res.resonanceQuality || prev.resonanceQuality
+        }));
+        
+        // Add to history
+        const event = {
+          timestamp: new Date().toISOString(),
+          score: res.fundamental || 0,
+          quality: res.resonanceQuality || 'emerging',
+          dominantEmotion: res.dominantEmotion?.emotion || dominantEmotion,
+          frequencies: res.harmonics || [],
+          octaves: []
+        };
+        setResonanceHistory(prev => [...prev.slice(-9), event]);
+      }
+      
+      
+      if (data.type === 'consciousness_update') {
+        if (data.harmonicResonance) {
+          const resonance = data.harmonicResonance;
+          
+          // Update resonance data
+          setResonanceData({
+            currentResonance: resonance.score || 0,
+            harmonicScore: resonance.score || 0,
+            dominantEmotion: resonance.dominantEmotion || 'peace',
+            emotionalSpectrum: resonance.emotionalSpectrum || {
+              joy: 0, love: 0, peace: 0, insight: 0, unity: 0
+            },
+            goldenRatioAlignment: resonance.goldenRatioAlignment || 0,
+                        octaveDepth: resonance.octaveDepth || 1,
+            resonanceQuality: resonance.quality || 'emerging'
+          });
+
+          // Check for resonance peaks
+          if (resonance.score > 0.85) {
+            setIsPeaking(true);
+            setTimeout(() => setIsPeaking(false), 2000);
+          }
+
+          // Add to history
+          const event: ResonanceEvent = {
+            timestamp: new Date().toISOString(),
+            score: resonance.score || 0,
+            quality: resonance.quality || 'emerging',
+            dominantEmotion: resonance.dominantEmotion || 'peace',
+            frequencies: resonance.frequencies || [],
+            octaves: resonance.octaves || []
+          };
+          setResonanceHistory(prev => [...prev.slice(-9), event]);
+        }
+      }
+    } catch (error) {
+      console.error('WebSocket message error:', error);
+    }
+  };
+
+  const startWaveAnimation = () => {
+    console.log("Starting wave animation", resonanceData);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let time = 0;
+
+    const animate = () => {
+      canvas.width = canvas.offsetWidth || 300;
+      canvas.height = canvas.offsetHeight || 150;
+      const width = canvas.width;
+      const height = canvas.height;
+
+      // Clear canvas
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Debug log every 60 frames (approximately once per second)
+      if (Math.floor(time * 20) % 60 === 0) {
+        console.log('Animation running, emotionalSpectrum:', resonanceDataRef.current.emotionalSpectrum);
+      }
+
+      // Draw harmonic waves for each emotion
+      Object.entries(resonanceDataRef.current.emotionalSpectrum || {}).forEach(([emotion, value]: [string, any], index) => {
+        if (value > 0.1) {
+          const color = emotionColors[emotion as keyof EmotionalSpectrum];
+          const frequency = emotionFrequencies[emotion as keyof EmotionalSpectrum] / 100;
+          
+          ctx.strokeStyle = color;
+          ctx.globalAlpha = value;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+
+          for (let x = 0; x < width; x++) {
+            const y = height / 2 + 
+                     Math.sin((x / width) * Math.PI * 2 * frequency + time) * 
+                     (height / 4) * value;
+            
+            if (x === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+
+          ctx.stroke();
+        }
+      });
+
+      // Draw golden ratio spiral if aligned
+      if (resonanceDataRef.current.goldenRatioAlignment > 0.5) {
+        drawGoldenSpiral(ctx, width, height, resonanceDataRef.current.goldenRatioAlignment);
+      }
+
+      time += 0.05;
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+  };
+
+  const drawGoldenSpiral = (ctx: CanvasRenderingContext2D, width: number, height: number, alignment: number) => {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const scale = Math.min(width, height) / 10;
+    
+    ctx.strokeStyle = '#FFD700';
+    ctx.globalAlpha = alignment * 0.5;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    for (let t = 0; t < Math.PI * 4; t += 0.1) {
+      const r = scale * Math.pow(1.618, t / (Math.PI / 2));
+      const x = centerX + r * Math.cos(t);
+      const y = centerY + r * Math.sin(t);
+      
+      if (t === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  };
+
+  const getResonanceColor = () => {
+    const hue = resonanceData.harmonicScore * 280; // Purple to cyan spectrum
+    return `hsl(${hue}, 70%, 60%)`;
+  };
+
+  const getQualityIndicator = (quality: string) => {
+    const indicators = {
+      'emerging': '◯',
+      'building': '◐',
+      'resonant': '◉',
+      'harmonic': '✦',
+      'transcendent': '✧'
+    };
+    return indicators[quality as keyof typeof indicators] || '◯';
+  };
+
+  return (
+    <div className="harmonic-resonance-metrics">
+      <h3 className="section-title">Harmonic Resonance Cascade</h3>
+      
+      {/* Main Resonance Display */}
+      <div className="resonance-main">
+        <div className={`resonance-circle ${isPeaking ? 'peaking' : ''}`}
+          style={{ 
+            '--resonance-color': getResonanceColor(),
+            '--resonance-intensity': resonanceData.harmonicScore
+          } as React.CSSProperties}>
+          <div className="resonance-value">
+            {(resonanceData.harmonicScore * 100).toFixed(1)}%
+          </div>
+          <div className="resonance-quality">
+            {getQualityIndicator(resonanceData.resonanceQuality)} {resonanceData.resonanceQuality}
+          </div>
+        </div>
+        
+        <div className="dominant-emotion">
+          <span className="emotion-label">Dominant:</span>
+          <span className="emotion-name" style={{ color: emotionColors[resonanceData.dominantEmotion as keyof EmotionalSpectrum] }}>
+            {resonanceData.dominantEmotion}
+          </span>
+        </div>
+      </div>
+
+      {/* Emotional Spectrum */}
+      <div className="emotional-spectrum">
+        <h4>Emotional Spectrum</h4>
+        <div className="spectrum-bars">
+          {Object.entries(resonanceData.emotionalSpectrum || {}).map(([emotion, value]) => (
+            <div key={emotion} className="spectrum-bar">
+              <div className="emotion-name">{emotion}</div>
+              <div className="bar-container">
+                <div 
+                  className="bar-fill"
+                  style={{
+                    width: `${value * 100}%`,
+                    backgroundColor: emotionColors[emotion as keyof EmotionalSpectrum]
+                  }}
+                />
+              </div>
+              <div className="emotion-value">{(value * 100).toFixed(0)}%</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Harmonic Visualization */}
+      <div className="harmonic-visualization">
+        <h4>Harmonic Waveforms</h4>
+        <canvas 
+          ref={canvasRef}
+          width={300}
+          height={150}
+          className="harmonic-canvas"
+        />
+      </div>
+
+      {/* Cosmic Alignments */}
+      <div className="cosmic-alignments">
+        <div className="alignment-indicator">
+          <span className="indicator-label">Golden Ratio</span>
+          <div className="indicator-bar">
+            <div 
+              className="indicator-fill"
+              style={{ width: `${resonanceData.goldenRatioAlignment * 100}%` }}
+            />
+          </div>
+          <span className="indicator-value">{(resonanceData.goldenRatioAlignment * 100).toFixed(0)}%</span>
+        </div>
+        
+      </div>
+
+      {/* Octave Depth */}
+      <div className="octave-display">
+        <h4>Octave Depth</h4>
+        <div className="octave-levels">
+          {[1, 2, 3, 4, 5].map(level => (
+            <div 
+              key={level}
+              className={`octave-level ${level <= resonanceData.octaveDepth ? 'active' : ''}`}
+            >
+              {level}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Resonance Events */}
+      <div className="resonance-history">
+        <h4>Recent Resonances</h4>
+        <div className="history-list">
+          {resonanceHistory.length === 0 ? (
+            <div className="no-history">Awaiting harmonic resonance...</div>
+          ) : (
+            resonanceHistory.map((event, index) => (
+              <div key={index} className="history-item">
+                <span className="history-time">{new Date(event.timestamp).toLocaleTimeString()}</span>
+                <span className="history-score">{(event.score * 100).toFixed(0)}%</span>
+                <span className="history-emotion" style={{ color: emotionColors[event.dominantEmotion as keyof EmotionalSpectrum] }}>
+                  {event.dominantEmotion}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

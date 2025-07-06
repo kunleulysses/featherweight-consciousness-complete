@@ -5,3 +5,4 @@ export { ConnectionStatus } from './ConnectionStatus';
 export { default as MemoryInspector } from './MemoryInspector';
 export { default as ConsciousnessChat } from './ConsciousnessChat';
 export { default as FlappyConsciousnessChat } from './FlappyConsciousnessChat';
+export { default as EnhancedFlappyChat } from './EnhancedFlappyChat';

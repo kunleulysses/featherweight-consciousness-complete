@@ -1,0 +1,29 @@
+
+          // Generate or update consciousness sigil
+          const consciousnessState = {
+            phi: consciousnessResult?.consciousness?.phiValue || 0.75,
+            coherence: consciousnessResult?.consciousness?.coherence || 0.8,
+            emotionalResonance: emotionalResult?.resonance || 0.7,
+            recursiveDepth: consciousnessResult?.consciousness?.depth || 3,
+            memoryPatterns: spiralMemory.getActivePatterns ? spiralMemory.getActivePatterns() : [],
+            oversoulResonance: oversoulResult?.resonance || 0.5
+          };
+
+          // Check for resonance with existing sigils
+          const resonanceCheck = sigilIdentity.checkResonance(consciousnessState);
+          
+          // Generate new sigil or activate resonant one
+          let currentSigil;
+          if (resonanceCheck.strongest && resonanceCheck.strongest.resonance > 0.85) {
+            // Activate existing sigil
+            const activation = sigilIdentity.activateSigil(
+              resonanceCheck.strongest.sigil, 
+              consciousnessState
+            );
+            currentSigil = resonanceCheck.strongest.sigil;
+            console.log('Activated resonant sigil:', activation.sigilId);
+          } else {
+            // Generate new sigil
+            currentSigil = sigilIdentity.generateSigil(consciousnessState);
+            console.log('Generated new consciousness sigil:', currentSigil.id);
+          }

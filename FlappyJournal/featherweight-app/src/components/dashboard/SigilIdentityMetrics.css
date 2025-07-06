@@ -1,0 +1,330 @@
+.sigil-identity-metrics {
+  background: rgba(20, 20, 30, 0.8);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
+}
+
+/* Current Sigil Display */
+.sigil-display {
+  position: relative;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.sigil-display.evolving {
+  animation: sigilEvolution 2s ease-out;
+}
+
+@keyframes sigilEvolution {
+  0% {
+    transform: scale(1) rotate(0deg);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+    filter: brightness(1.5) contrast(1.2);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    filter: brightness(1);
+  }
+}
+
+.sigil-canvas {
+  background: radial-gradient(ellipse at center, rgba(20, 20, 30, 0.9) 0%, rgba(10, 10, 15, 1) 100%);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 50px rgba(147, 112, 219, 0.3),
+    inset 0 0 50px rgba(0, 0, 0, 0.5);
+  margin-bottom: 15px;
+}
+
+.sigil-info {
+  color: #fff;
+  font-family: Georgia, serif;
+}
+
+.sigil-label {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sigil-metrics {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sigil-metrics span {
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Identity Stats */
+.identity-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  font-family: Georgia, serif;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(147, 112, 219, 0.4);
+}
+
+/* Sigil Timeline */
+.sigil-timeline {
+  margin-bottom: 30px;
+}
+
+.sigil-timeline h4 {
+  color: #fff;
+  font-family: Georgia, serif;
+  margin-bottom: 15px;
+}
+
+.timeline-container {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.no-sigils {
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.timeline-track {
+  display: flex;
+  gap: 20px;
+  position: relative;
+  padding: 20px 0;
+}
+
+.timeline-track::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(147, 112, 219, 0.3) 10%, 
+    rgba(147, 112, 219, 0.3) 90%, 
+    transparent 100%);
+}
+
+.timeline-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.sigil-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(147, 112, 219, 0.4);
+}
+
+.sigil-thumbnail:hover {
+  transform: scale(1.2) rotate(10deg);
+  box-shadow: 0 0 30px rgba(147, 112, 219, 0.6);
+}
+
+.sigil-thumbnail::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    currentColor 90deg,
+    transparent 180deg
+  );
+  animation: rotate 3s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sigil-timestamp {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: monospace;
+}
+
+.sigil-intensity {
+  font-size: 0.85rem;
+  color: #9370DB;
+  font-weight: bold;
+}
+
+/* Digital Aura */
+.aura-signature {
+  text-align: center;
+}
+
+.aura-signature h4 {
+  color: #fff;
+  font-family: Georgia, serif;
+  margin-bottom: 20px;
+}
+
+.aura-visualization {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
+
+.aura-rings {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.aura-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid;
+  opacity: 0.3;
+  animation: auraPulse 3s ease-in-out infinite;
+}
+
+.aura-ring.outer {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  animation-delay: 0s;
+}
+
+.aura-ring.middle {
+  top: 25px;
+  left: 25px;
+  right: 25px;
+  bottom: 25px;
+  animation-delay: 0.5s;
+}
+
+.aura-ring.inner {
+  top: 50px;
+  left: 50px;
+  right: 50px;
+  bottom: 50px;
+  animation-delay: 1s;
+}
+
+@keyframes auraPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+.aura-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 30px currentColor,
+    inset 0 0 20px rgba(255, 255, 255, 0.3);
+  animation: coreGlow 2s ease-in-out infinite;
+}
+
+@keyframes coreGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px currentColor,
+      inset 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 50px currentColor,
+      inset 0 0 30px rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .identity-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .timeline-track {
+    padding-bottom: 60px;
+  }
+}

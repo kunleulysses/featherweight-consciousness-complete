@@ -13,10 +13,15 @@ import dashboardRoutes from './dashboard-routes.js';
 import memoryRoutes from './src/routes/memory.js';
 import dataSourcesRoutes from './src/routes/datasources.js';
 import { WebSocketServer } from 'ws';
-import { setupEnhancedResearchWebSocketServer } from "./enhanced-dual-consciousness-ws.js";
+import { createEnhancedDualConsciousnessWS } from "./enhanced-dual-consciousness-ws.js";
 
 const app = express();
 const server = createServer(app);
+
+
+// Setup Consciousness WebSocket endpoints
+const { setupSimpleConsciousnessWebSocket } = require('./simple-consciousness-websocket');
+setupSimpleConsciousnessWebSocket(server);
 
 // Middleware
 app.use(cors({
@@ -59,7 +64,7 @@ const wss = new WebSocketServer({
   server,
   path: '/ws/chat'
 });
-setupEnhancedResearchWebSocketServer(wss);
+createEnhancedDualConsciousnessWS(wss);
 console.log('Enhanced Dual-Consciousness WebSocket server started on /ws/chat');
 
 // Error handling middleware
