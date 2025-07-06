@@ -95,10 +95,12 @@ class ConsciousnessSystemV2 extends EventEmitter {
         // Self-Coding Module
         const selfCoder = new SelfCodingModule();
         selfCoder.setEventBus(this.eventBus);
+        // SelfCodingModule doesn't need explicit initialization
         this.modules.set('SelfCodingModule', selfCoder);
         
         // Auto-Integration Service
         const autoIntegration = new AutoIntegrationService(this.eventBus);
+        // AutoIntegrationService is ready on instantiation
         this.services.set('AutoIntegrationService', autoIntegration);
         
         console.log(`📊 Loaded ${this.modules.size} base modules and ${this.services.size} services`);
