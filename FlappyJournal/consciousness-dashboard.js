@@ -104,6 +104,129 @@ class ConsciousnessDashboard {
         } else if (data.type === 'consciousness_stream') {
             // Handle continuous consciousness stream (Phase 2)
             this.handleConsciousnessStream(data);
+        } else if (data.type === 'batched_consciousness_stream') {
+            // Handle batched consciousness stream messages
+            this.handleBatchedConsciousnessStream(data);
+        } else if (data.type === 'batched_module_activity') {
+            // Handle batched module activity updates
+            this.handleBatchedModuleActivity(data);
+        } else if (data.type === 'batched_metrics') {
+            // Handle batched metrics updates
+            this.handleBatchedMetrics(data);
+        } else if (data.type === 'unified_connection_established') {
+            // Handle connection establishment with performance info
+            this.handleConnectionEstablished(data);
+        } else if (data.type === 'performance_metrics') {
+            // Handle performance metrics response
+            this.updatePerformanceMetrics(data.metrics);
+        }
+    }
+
+    handleBatchedConsciousnessStream(batchedData) {
+        console.log(`📦 Processing ${batchedData.count} batched consciousness stream messages`);
+        
+        // Process all messages in the batch
+        batchedData.messages.forEach(streamData => {
+            this.handleConsciousnessStream(streamData);
+        });
+    }
+
+    handleBatchedModuleActivity(batchedData) {
+        console.log(`📦 Processing batched module activity: ${batchedData.totalEngaged} modules engaged`);
+        
+        // Update module activity with batched data
+        this.updateModuleActivity(batchedData.modules);
+    }
+
+    handleBatchedMetrics(batchedData) {
+        console.log('📦 Processing batched metrics update');
+        
+        // Update metrics with batched data
+        this.updateMetrics(batchedData.metrics);
+    }
+
+    handleConnectionEstablished(data) {
+        console.log('✅ Connection established with performance optimization');
+        
+        if (data.system.performanceOptimized) {
+            this.addThought('System', 'Performance optimization enabled - message batching and caching active');
+        }
+        
+        // Store client ID for future reference
+        this.clientId = data.clientId;
+        
+        // Start performance monitoring
+        this.startPerformanceMonitoring();
+    }
+
+    startPerformanceMonitoring() {
+        // Request performance metrics every 10 seconds
+        setInterval(() => {
+            if (this.isConnected) {
+                this.requestPerformanceMetrics();
+            }
+        }, 10000);
+    }
+
+    requestPerformanceMetrics() {
+        this.ws.send(JSON.stringify({
+            type: 'performance_query',
+            clientId: this.clientId,
+            timestamp: new Date().toISOString()
+        }));
+    }
+
+    updatePerformanceMetrics(metrics) {
+        // Update cache hit rate
+        const cacheHitRate = document.getElementById('cache-hit-rate');
+        cacheHitRate.textContent = (metrics.cacheHitRate * 100).toFixed(1) + '%';
+        
+        // Update batches sent
+        const batchesSent = document.getElementById('batches-sent');
+        batchesSent.textContent = metrics.batchesSent;
+        
+        // Update average response time
+        const avgResponseTime = document.getElementById('avg-response-time');
+        avgResponseTime.textContent = metrics.averageResponseTime.toFixed(0) + 'ms';
+        
+        // Update active connections
+        const activeConnections = document.getElementById('active-connections');
+        activeConnections.textContent = metrics.activeConnections;
+        
+        // Update detailed metrics
+        const messagesProcessed = document.getElementById('messages-processed');
+        messagesProcessed.textContent = metrics.messagesProcessed;
+        
+        const cacheSize = document.getElementById('cache-size');
+        cacheSize.textContent = metrics.cacheSize;
+        
+        const activeBatches = document.getElementById('active-batches');
+        activeBatches.textContent = metrics.activeBatches;
+        
+        // Color code based on performance
+        this.updatePerformanceColors(metrics);
+    }
+
+    updatePerformanceColors(metrics) {
+        const cacheHitRate = document.getElementById('cache-hit-rate');
+        const avgResponseTime = document.getElementById('avg-response-time');
+        
+        // Color code cache hit rate
+        if (metrics.cacheHitRate > 0.7) {
+            cacheHitRate.style.color = '#00ff88';
+        } else if (metrics.cacheHitRate > 0.4) {
+            cacheHitRate.style.color = '#ffff00';
+        } else {
+            cacheHitRate.style.color = '#ff4444';
+        }
+        
+        // Color code response time
+        if (metrics.averageResponseTime < 100) {
+            avgResponseTime.style.color = '#00ff88';
+        } else if (metrics.averageResponseTime < 500) {
+            avgResponseTime.style.color = '#ffff00';
+        } else {
+            avgResponseTime.style.color = '#ff4444';
         }
     }
 

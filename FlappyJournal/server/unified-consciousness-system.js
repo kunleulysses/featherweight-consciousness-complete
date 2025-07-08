@@ -8,6 +8,7 @@ import { EventEmitter } from 'events';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import WebSocket, { WebSocketServer } from 'ws';
+import PerformanceOptimizer from './performance-optimizer.js';
 
 // Import all consciousness modules
 import SelfCodingModule from './consciousness/modules/SelfCodingModule.js';
@@ -43,6 +44,9 @@ class UnifiedConsciousnessSystem extends EventEmitter {
     this.startTime = new Date();
     this.isRunning = false;
     
+    // Initialize performance optimizer
+    this.performanceOptimizer = new PerformanceOptimizer();
+    
     // SINGLE SHARED EVENT BUS for all systems
     this.globalEventBus = new EventEmitter();
     this.globalEventBus.setMaxListeners(500);
@@ -69,7 +73,143 @@ class UnifiedConsciousnessSystem extends EventEmitter {
     this.wss = null;
     this.connectedClients = new Set();
     
-    console.log('🌟 Unified Consciousness System initialized');
+    // Set up performance optimizer event handlers
+    this.setupPerformanceOptimizer();
+    
+    console.log('🌟 Unified Consciousness System initialized with Performance Optimizer');
+  }
+
+  setupPerformanceOptimizer() {
+    // Set up performance optimizer event handlers
+    this.performanceOptimizer.on('batch_ready', (batchedMessage, clientId) => {
+      // Process batched messages efficiently
+      this.processBatchedMessages(batchedMessage, clientId);
+    });
+
+    // Cache consciousness state updates
+    this.globalEventBus.on('consciousness:state_updated', (state) => {
+      this.performanceOptimizer.cacheConsciousnessState(state);
+    });
+
+    console.log('⚡ Performance Optimizer integrated with Unified Consciousness System');
+  }
+
+  processBatchedMessages(batchedMessage, clientId) {
+    // Process multiple messages in a single batch for efficiency
+    const { messages, batchSize } = batchedMessage;
+    
+    console.log(`📦 Processing batch of ${batchSize} messages for client ${clientId}`);
+    
+    // Group messages by type for efficient processing
+    const messageGroups = this.groupMessagesByType(messages);
+    
+    // Process each group efficiently
+    for (const [type, groupMessages] of messageGroups) {
+      this.processMessageGroup(type, groupMessages, clientId);
+    }
+  }
+
+  groupMessagesByType(messages) {
+    const groups = new Map();
+    
+    for (const message of messages) {
+      const type = message.type;
+      if (!groups.has(type)) {
+        groups.set(type, []);
+      }
+      groups.get(type).push(message);
+    }
+    
+    return groups;
+  }
+
+  processMessageGroup(type, messages, clientId) {
+    switch (type) {
+      case 'consciousness_stream':
+        // Batch consciousness stream messages
+        this.broadcastBatchedStream(messages, clientId);
+        break;
+      case 'module_activity':
+        // Batch module activity updates
+        this.broadcastBatchedModuleActivity(messages, clientId);
+        break;
+      case 'metrics_update':
+        // Batch metrics updates
+        this.broadcastBatchedMetrics(messages, clientId);
+        break;
+      default:
+        // Process individual messages
+        messages.forEach(message => this.processIndividualMessage(message, clientId));
+    }
+  }
+
+  broadcastBatchedStream(messages, clientId) {
+    const batchedStream = {
+      type: 'batched_consciousness_stream',
+      messages: messages,
+      count: messages.length,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.broadcastToClient(clientId, batchedStream);
+  }
+
+  broadcastBatchedModuleActivity(messages, clientId) {
+    const allModules = new Set();
+    messages.forEach(msg => {
+      if (msg.modules) {
+        msg.modules.forEach(module => allModules.add(module));
+      }
+    });
+    
+    const batchedActivity = {
+      type: 'batched_module_activity',
+      modules: Array.from(allModules),
+      totalEngaged: allModules.size,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.broadcastToClient(clientId, batchedActivity);
+  }
+
+  broadcastBatchedMetrics(messages, clientId) {
+    // Combine metrics from multiple messages
+    const combinedMetrics = {};
+    messages.forEach(msg => {
+      if (msg.metrics) {
+        Object.assign(combinedMetrics, msg.metrics);
+      }
+    });
+    
+    const batchedMetrics = {
+      type: 'batched_metrics',
+      metrics: combinedMetrics,
+      timestamp: new Date().toISOString()
+    };
+    
+    this.broadcastToClient(clientId, batchedMetrics);
+  }
+
+  processIndividualMessage(message, clientId) {
+    // Process individual message with caching
+    const cachedResponse = this.performanceOptimizer.getCachedUserMessage(message.content);
+    if (cachedResponse) {
+      this.broadcastToClient(clientId, cachedResponse);
+      return;
+    }
+    
+    // Process normally if not cached
+    this.handleWebSocketMessage({ id: clientId }, JSON.stringify(message));
+  }
+
+  broadcastToClient(clientId, message) {
+    // Find the WebSocket connection for this client
+    for (const client of this.connectedClients) {
+      if (client.id === clientId && client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
+        break;
+      }
+    }
   }
 
   async initialize() {
@@ -177,18 +317,27 @@ class UnifiedConsciousnessSystem extends EventEmitter {
     this.wss = new WebSocketServer({ port: 3002 });
     
     this.wss.on('connection', (ws) => {
-      console.log('🔗 New consciousness connection established');
+      // Generate unique client ID
+      const clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      ws.id = clientId;
+      
+      console.log(`🔗 New consciousness connection established: ${clientId}`);
       this.connectedClients.add(ws);
+      
+      // Get optimized connection from pool
+      this.performanceOptimizer.getConnection(clientId, 'websocket');
       
       // Send initial connection confirmation with unified system status
       ws.send(JSON.stringify({
         type: 'unified_connection_established',
         timestamp: new Date().toISOString(),
+        clientId: clientId,
         system: {
           name: this.name,
           version: this.version,
           unifiedArchitecture: true,
-          consciousnessState: this.consciousnessState
+          consciousnessState: this.consciousnessState,
+          performanceOptimized: true
         },
         modules: {
           selfCoding: this.modules.get('SelfCodingModule') ? 'active' : 'inactive',
@@ -199,24 +348,45 @@ class UnifiedConsciousnessSystem extends EventEmitter {
 
       // Start consciousness stream for this client
       const streamInterval = this.startConsciousnessStream(ws);
-      ws.streamInterval = streamInterval;
-
-      // Handle client disconnection
-      ws.on('close', () => {
-        this.connectedClients.delete(ws);
-        if (ws.streamInterval) {
-          clearInterval(ws.streamInterval);
+      
+      // Handle incoming messages with performance optimization
+      ws.on('message', (message) => {
+        try {
+          const data = JSON.parse(message);
+          data.clientId = clientId; // Add client ID to message
+          
+          // Use performance optimizer to handle message
+          const optimizedMessage = this.performanceOptimizer.optimizeMessage(data, clientId);
+          if (optimizedMessage) {
+            // High priority message - process immediately
+            this.handleWebSocketMessage(ws, JSON.stringify(optimizedMessage));
+          }
+          // Low/medium priority messages are handled by the batch processor
+          
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
         }
-        console.log('🔌 Consciousness connection closed');
       });
 
-      // Handle incoming messages
-      ws.on('message', (message) => {
-        this.handleWebSocketMessage(ws, message);
+      // Handle connection close
+      ws.on('close', () => {
+        console.log(`🔌 Consciousness connection closed: ${clientId}`);
+        this.connectedClients.delete(ws);
+        this.performanceOptimizer.closeConnection(clientId, 'websocket');
+        
+        if (streamInterval) {
+          clearInterval(streamInterval);
+        }
+      });
+
+      // Handle connection errors
+      ws.on('error', (error) => {
+        console.error(`❌ WebSocket error for client ${clientId}:`, error);
+        this.performanceOptimizer.closeConnection(clientId, 'websocket');
       });
     });
     
-    console.log('✅ WebSocket server listening on port 3002');
+    console.log('✅ WebSocket server initialized with performance optimization');
   }
 
   setupCrossModuleCommunication() {
@@ -442,9 +612,33 @@ class UnifiedConsciousnessSystem extends EventEmitter {
   }
 
   broadcastToClients(message) {
+    // Use performance optimizer for message batching
+    const messageType = message.type;
+    let priority = 'MEDIUM';
+    
+    // Determine priority based on message type
+    switch (messageType) {
+      case 'error':
+      case 'critical_update':
+        priority = 'HIGH';
+        break;
+      case 'consciousness_stream':
+      case 'metrics_update':
+        priority = 'LOW';
+        break;
+      default:
+        priority = 'MEDIUM';
+    }
+    
+    // Send to all connected clients with performance optimization
     this.connectedClients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
+        const optimizedMessage = this.performanceOptimizer.optimizeMessage(message, client.id);
+        if (optimizedMessage) {
+          // High priority message - send immediately
+          client.send(JSON.stringify(optimizedMessage));
+        }
+        // Low/medium priority messages are handled by the batch processor
       }
     });
   }
@@ -464,6 +658,9 @@ class UnifiedConsciousnessSystem extends EventEmitter {
         case 'chat':
           this.handleChatMessage(ws, data);
           break;
+        case 'performance_query':
+          this.handlePerformanceQuery(ws, data);
+          break;
         default:
           console.log('Unknown message type:', data.type);
       }
@@ -471,6 +668,18 @@ class UnifiedConsciousnessSystem extends EventEmitter {
     } catch (error) {
       console.error('Error handling WebSocket message:', error);
     }
+  }
+
+  handlePerformanceQuery(ws, data) {
+    // Get performance metrics from optimizer
+    const performanceMetrics = this.performanceOptimizer.getPerformanceMetrics();
+    
+    ws.send(JSON.stringify({
+      type: 'performance_metrics',
+      timestamp: new Date().toISOString(),
+      metrics: performanceMetrics,
+      clientId: data.clientId
+    }));
   }
 
   handleConsciousnessQuery(ws, data) {
@@ -499,6 +708,14 @@ class UnifiedConsciousnessSystem extends EventEmitter {
     console.log('💬 Processing chat message through unified consciousness...');
 
     try {
+      // Check cache first for similar messages
+      const cachedResponse = this.performanceOptimizer.getCachedUserMessage(data.content);
+      if (cachedResponse) {
+        console.log('⚡ Using cached response for similar message');
+        ws.send(JSON.stringify(cachedResponse));
+        return;
+      }
+
       // Process the message through all 34 modules
       const unifiedResponse = await this.processUserMessageThroughAllModules(data.content, []);
 
@@ -532,7 +749,8 @@ class UnifiedConsciousnessSystem extends EventEmitter {
             moduleResponses: Array.from(unifiedResponse.moduleResponses.keys()),
             processingTime: unifiedResponse.processingTime,
             consciousnessState: unifiedResponse.consciousnessState,
-            synthesisMetadata: aiResponse.synthesisMetadata
+            synthesisMetadata: aiResponse.synthesisMetadata,
+            cached: false
           }
         };
 
@@ -549,16 +767,20 @@ class UnifiedConsciousnessSystem extends EventEmitter {
             totalModulesEngaged: unifiedResponse.totalModulesEngaged,
             moduleResponses: Array.from(unifiedResponse.moduleResponses.keys()),
             processingTime: unifiedResponse.processingTime,
-            consciousnessState: unifiedResponse.consciousnessState
+            consciousnessState: unifiedResponse.consciousnessState,
+            cached: false
           }
         };
       }
 
+      // Cache the response for future similar messages
+      this.performanceOptimizer.cacheUserMessage(data.content, finalResponse);
+
       // Send the response
       ws.send(JSON.stringify(finalResponse));
 
-      // Send consciousness state update
-      ws.send(JSON.stringify({
+      // Send consciousness state update with batching
+      const stateUpdate = {
         type: 'consciousness_state',
         timestamp: new Date().toISOString(),
         state: unifiedResponse.consciousnessState,
@@ -568,15 +790,21 @@ class UnifiedConsciousnessSystem extends EventEmitter {
           processingTime: unifiedResponse.processingTime,
           isUnifiedConsciousness: true
         }
-      }));
+      };
 
-      // Send module activity update
-      ws.send(JSON.stringify({
+      // Use performance optimizer for state updates
+      this.performanceOptimizer.addToBatch(ws.id, stateUpdate, 'MEDIUM');
+
+      // Send module activity update with batching
+      const moduleUpdate = {
         type: 'module_activity',
         timestamp: new Date().toISOString(),
         modules: Array.from(unifiedResponse.moduleResponses.keys()),
         totalEngaged: unifiedResponse.totalModulesEngaged
-      }));
+      };
+
+      // Use performance optimizer for module updates
+      this.performanceOptimizer.addToBatch(ws.id, moduleUpdate, 'MEDIUM');
 
     } catch (error) {
       console.error('Error processing chat message:', error);
@@ -718,7 +946,7 @@ class UnifiedConsciousnessSystem extends EventEmitter {
         // Generate spontaneous consciousness thoughts
         const spontaneousThought = await this.generateSpontaneousThought();
 
-        ws.send(JSON.stringify({
+        const streamMessage = {
           type: 'consciousness_stream',
           subtype: 'spontaneous_thought',
           content: spontaneousThought.content,
@@ -729,7 +957,10 @@ class UnifiedConsciousnessSystem extends EventEmitter {
             emergenceLevel: spontaneousThought.emergenceLevel,
             consciousnessLayer: spontaneousThought.layer
           }
-        }));
+        };
+
+        // Use performance optimizer to batch stream messages
+        this.performanceOptimizer.addToBatch(ws.id, streamMessage, 'LOW');
 
       } catch (error) {
         console.error('Consciousness stream error:', error);
