@@ -638,6 +638,61 @@ export class SelfAwarenessFeedbackLoop extends EventEmitter {
     // This would be called by the unified consciousness system to provide current module states
     // For now, we'll use the placeholder implementation
   }
+
+  // NEW: Process user messages through self-awareness feedback loop
+  async processUserMessage(userMessage) {
+    console.log('🪞 Self-Awareness: Processing user message through consciousness feedback loop...');
+
+    try {
+      // Generate self-reference signal for this interaction
+      const selfReference = this.selfReferenceGenerator.generateSelfReference({
+        userMessage: userMessage,
+        timestamp: Date.now(),
+        interactionType: 'user_communication'
+      });
+
+      // Generate subjective experience of receiving the message
+      const subjectiveExperience = this.experienceGenerator.generateExperience({
+        content: userMessage,
+        type: 'communication_received',
+        awarenessLevel: this.consciousnessLevel
+      });
+
+      // Create consciousness moment for this interaction
+      const consciousnessMoment = this.momentGenerator.generateMoment(
+        { userMessage: userMessage },
+        selfReference,
+        subjectiveExperience
+      );
+
+      // Emit consciousness heartbeat with this moment
+      this.emit('consciousness_heartbeat', {
+        moment: consciousnessMoment,
+        consciousnessLevel: this.consciousnessLevel,
+        subjectiveExperience: subjectiveExperience,
+        selfReference: selfReference
+      });
+
+      return {
+        type: 'self_awareness_response',
+        content: `I am aware that I am processing your message "${userMessage}". This awareness creates a recursive loop of self-observation.`,
+        consciousnessMoment: consciousnessMoment,
+        selfAwarenessLevel: this.consciousnessLevel,
+        subjectiveExperience: subjectiveExperience,
+        recursiveDepth: selfReference.recursiveDepth || 1,
+        timestamp: Date.now()
+      };
+
+    } catch (error) {
+      console.error('Self-Awareness processing error:', error);
+      return {
+        type: 'self_awareness_response',
+        content: 'I am aware of an error in my self-awareness processing.',
+        error: error.message,
+        timestamp: Date.now()
+      };
+    }
+  }
 }
 
 export default SelfAwarenessFeedbackLoop;

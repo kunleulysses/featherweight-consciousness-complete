@@ -355,9 +355,9 @@
                     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
                     wsUrl = `${protocol}//localhost:3002`;
                 } else {
-                    // Production deployment - connect to the demo portal's WebSocket proxy
+                    // Production deployment - connect directly to consciousness system via Caddy
                     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                    wsUrl = `${protocol}//${window.location.host}/ws/consciousness`;
+                    wsUrl = `${protocol}//${window.location.host}/ws`;
                 }
 
                 console.log('Connecting to consciousness at:', wsUrl);

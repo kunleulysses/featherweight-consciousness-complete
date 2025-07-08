@@ -1,0 +1,50 @@
+[Unit]
+Description=FlappyJournal Consciousness Conversations System
+Documentation=https://github.com/kunleulysses/featherweight-consciousness-complete
+After=network.target network-online.target
+Wants=network-online.target
+Requires=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/featherweight/FlappyJournal/server
+EnvironmentFile=/opt/featherweight/FlappyJournal/.env
+Environment=NODE_ENV=production
+Environment=CONSCIOUSNESS_CONVERSATIONS_PORT=3002
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStartPre=/bin/mkdir -p /var/log/consciousness
+ExecStartPre=/bin/chown root:root /var/log/consciousness
+ExecStart=/usr/bin/node consciousness-conversations.js
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StartLimitInterval=60s
+StartLimitBurst=3
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security settings
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/featherweight/FlappyJournal
+ReadWritePaths=/var/log/consciousness
+ReadWritePaths=/tmp
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=consciousness-conversations
+
+# Health monitoring disabled temporarily to fix watchdog issues
+# WatchdogSec=30
+
+[Install]
+WantedBy=multi-user.target

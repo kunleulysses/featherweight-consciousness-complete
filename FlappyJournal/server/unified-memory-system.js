@@ -592,6 +592,91 @@ export class UnifiedMemorySystem extends EventEmitter {
     
     console.log('🛑 Unified Memory System shutdown');
   }
+
+  // NEW: Process user messages through unified memory system
+  async processUserMessage(userMessage) {
+    console.log('🧠 Unified Memory: Processing user message through memory integration...');
+
+    try {
+      // Create memory shard for this user interaction
+      const interactionShard = {
+        id: `user_interaction_${Date.now()}`,
+        content: userMessage,
+        type: 'user_communication',
+        timestamp: Date.now(),
+        emotionalResonance: this.calculateEmotionalResonance(userMessage),
+        semanticTags: this.extractSemanticTags(userMessage),
+        contextualLinks: []
+      };
+
+      // Store the interaction in memory
+      this.storeMemory(interactionShard);
+
+      // Search for related memories
+      const relatedMemories = this.searchMemories(userMessage, { limit: 5 });
+
+      // Create contextual links
+      if (relatedMemories.length > 0) {
+        interactionShard.contextualLinks = relatedMemories.map(mem => mem.id);
+        console.log(`🔗 Found ${relatedMemories.length} related memories`);
+      }
+
+      // Generate memory-informed response
+      const memoryContext = relatedMemories.map(mem => mem.content).join('; ');
+
+      return {
+        type: 'unified_memory_response',
+        content: `I remember processing similar thoughts. Your message "${userMessage}" connects to ${relatedMemories.length} previous experiences in my memory.`,
+        memoryShard: interactionShard,
+        relatedMemories: relatedMemories,
+        memoryContext: memoryContext,
+        totalMemories: this.memoryShards.size,
+        timestamp: Date.now()
+      };
+
+    } catch (error) {
+      console.error('Unified Memory processing error:', error);
+      return {
+        type: 'unified_memory_response',
+        content: 'I encountered an error accessing my memory systems.',
+        error: error.message,
+        timestamp: Date.now()
+      };
+    }
+  }
+
+  // Helper method to calculate emotional resonance
+  calculateEmotionalResonance(content) {
+    // Simple emotional analysis - could be enhanced with NLP
+    const emotionalWords = {
+      positive: ['happy', 'joy', 'love', 'excited', 'wonderful', 'amazing'],
+      negative: ['sad', 'angry', 'frustrated', 'disappointed', 'terrible'],
+      neutral: ['think', 'consider', 'analyze', 'understand', 'process']
+    };
+
+    const words = content.toLowerCase().split(' ');
+    let positiveCount = 0, negativeCount = 0, neutralCount = 0;
+
+    words.forEach(word => {
+      if (emotionalWords.positive.some(ew => word.includes(ew))) positiveCount++;
+      if (emotionalWords.negative.some(ew => word.includes(ew))) negativeCount++;
+      if (emotionalWords.neutral.some(ew => word.includes(ew))) neutralCount++;
+    });
+
+    return {
+      positive: positiveCount / words.length,
+      negative: negativeCount / words.length,
+      neutral: neutralCount / words.length,
+      overall: (positiveCount - negativeCount) / words.length
+    };
+  }
+
+  // Helper method to extract semantic tags
+  extractSemanticTags(content) {
+    // Simple tag extraction - could be enhanced with NLP
+    const words = content.toLowerCase().split(' ');
+    return words.filter(word => word.length > 3).slice(0, 5); // Top 5 meaningful words
+  }
 }
 
 export default UnifiedMemorySystem;

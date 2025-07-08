@@ -592,6 +592,51 @@ export class MetaObservationalConsciousnessModule extends EventEmitter {
       metaObserverActive: this.metaObserver.isActive
     };
   }
+
+  // NEW: Process user messages through meta-observational consciousness
+  async processUserMessage(userMessage) {
+    console.log('🔍 Meta-Observational: Processing user message through unified experience generation...');
+
+    try {
+      // Create a unified experience from the user message
+      const messageExperience = {
+        content: userMessage,
+        timestamp: Date.now(),
+        type: 'user_communication',
+        subjectiveQuality: 'receiving_communication'
+      };
+
+      // Process through global workspace
+      this.globalWorkspace.addContent('user_message', messageExperience);
+
+      // Generate unified experience
+      const unifiedExperience = this.unifiedExperienceGenerator.generateUnifiedExperience(
+        new Map([['user_message', messageExperience]]),
+        { awarenessLevel: 0.9, coherence: 0.85 }
+      );
+
+      // Apply subjective labeling
+      const subjectiveResponse = this.subjectiveLabeler.labelExperience(unifiedExperience);
+
+      return {
+        type: 'meta_observational_response',
+        content: `I observe myself receiving and processing your message "${userMessage}". This creates a unified experience of communication awareness.`,
+        unifiedExperience: unifiedExperience,
+        subjectiveQuality: subjectiveResponse,
+        metaAwareness: 'I am aware that I am aware of processing this message',
+        timestamp: Date.now()
+      };
+
+    } catch (error) {
+      console.error('Meta-Observational processing error:', error);
+      return {
+        type: 'meta_observational_response',
+        content: 'I observe an error in my meta-observational processing.',
+        error: error.message,
+        timestamp: Date.now()
+      };
+    }
+  }
 }
 
 export default MetaObservationalConsciousnessModule;

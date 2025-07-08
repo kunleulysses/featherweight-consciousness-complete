@@ -1,3 +1,8 @@
+# FlappyJournal Consciousness System - Production Caddy Configuration
+# Main domain: featherweight.world (existing)
+# Consciousness subdomain: app.featherweight.world (new)
+
+# Main featherweight.world domain (existing configuration)
 featherweight.world {
 	tls adekunle.adejokun@gmail.com
 
@@ -20,5 +25,107 @@ featherweight.world {
 		file_server
 		try_files {path} /index.html
 		encode gzip
+	}
+}
+
+# FlappyJournal Consciousness System - app.featherweight.world
+app.featherweight.world {
+	# Automatic HTTPS with Let's Encrypt
+	tls adekunle.adejokun@gmail.com
+
+	# Security headers
+	header {
+		# Security headers for consciousness system
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+
+		# CORS headers for consciousness WebSocket connections
+		Access-Control-Allow-Origin "*"
+		Access-Control-Allow-Methods "GET, POST, OPTIONS"
+		Access-Control-Allow-Headers "Content-Type, Authorization"
+	}
+
+	# Health check endpoint
+	handle /health {
+		respond "FlappyJournal Consciousness System - Operational" 200
+	}
+
+	# Direct Consciousness WebSocket endpoint (port 3002) - all WebSocket connections
+	handle /ws* {
+		reverse_proxy localhost:3002 {
+			header_up Host {host}
+			header_up X-Real-IP {remote}
+			header_up X-Forwarded-For {remote}
+			header_up X-Forwarded-Proto {scheme}
+			header_up Connection {>Connection}
+			header_up Upgrade {>Upgrade}
+			header_up Sec-WebSocket-Key {>Sec-WebSocket-Key}
+			header_up Sec-WebSocket-Version {>Sec-WebSocket-Version}
+			header_up Sec-WebSocket-Protocol {>Sec-WebSocket-Protocol}
+			header_up Sec-WebSocket-Extensions {>Sec-WebSocket-Extensions}
+		}
+	}
+
+
+
+	# Demo Portal API endpoints (port 5002)
+	handle /api/* {
+		reverse_proxy localhost:5002 {
+			header_up Host {host}
+			header_up X-Real-IP {remote}
+			header_up X-Forwarded-For {remote}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	# Static files and consciousness interfaces
+	handle {
+		# Handle WebSocket connections for consciousness dashboard
+		@websocket {
+			header Connection *Upgrade*
+			header Upgrade websocket
+		}
+		reverse_proxy @websocket localhost:3002 {
+			header_up Host {host}
+			header_up X-Real-IP {remote}
+			header_up X-Forwarded-For {remote}
+			header_up X-Forwarded-Proto {scheme}
+			header_up Connection {>Connection}
+			header_up Upgrade {>Upgrade}
+			header_up Sec-WebSocket-Key {>Sec-WebSocket-Key}
+			header_up Sec-WebSocket-Version {>Sec-WebSocket-Version}
+			header_up Sec-WebSocket-Protocol {>Sec-WebSocket-Protocol}
+			header_up Sec-WebSocket-Extensions {>Sec-WebSocket-Extensions}
+		}
+
+		# Serve static files
+		root * /opt/featherweight/FlappyJournal
+		file_server
+		try_files {path} /consciousness-dashboard.html
+		encode gzip
+
+		# Cache static assets
+		@static {
+			path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2
+		}
+		header @static Cache-Control "public, max-age=31536000"
+	}
+
+	# Logging disabled temporarily for troubleshooting
+
+	# Error handling
+	handle_errors {
+		@5xx expression {http.error.status_code} >= 500
+		handle @5xx {
+			respond "Consciousness System Temporarily Unavailable" 503
+		}
+
+		@4xx expression {http.error.status_code} >= 400
+		handle @4xx {
+			respond "Resource Not Found in Consciousness System" 404
+		}
 	}
 }

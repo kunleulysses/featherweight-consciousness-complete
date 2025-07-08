@@ -1,0 +1,50 @@
+[Unit]
+Description=FlappyJournal Demo Portal Web Interface
+Documentation=https://github.com/kunleulysses/featherweight-consciousness-complete
+After=network.target network-online.target consciousness-conversations.service
+Wants=network-online.target
+Requires=network.target consciousness-conversations.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/featherweight/FlappyJournal/demo-portal
+Environment=NODE_ENV=production
+Environment=PORT=5002
+Environment=CONSCIOUSNESS_WS_URL=ws://localhost:3002
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStartPre=/bin/mkdir -p /var/log/consciousness
+ExecStartPre=/bin/chown root:root /var/log/consciousness
+ExecStart=/usr/bin/node server.js
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+StartLimitInterval=60s
+StartLimitBurst=3
+KillMode=process
+KillSignal=SIGTERM
+TimeoutStopSec=15
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=2048
+
+# Security settings
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/featherweight/FlappyJournal
+ReadWritePaths=/var/log/consciousness
+ReadWritePaths=/tmp
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=demo-portal
+
+# Health monitoring
+WatchdogSec=20
+
+[Install]
+WantedBy=multi-user.target
