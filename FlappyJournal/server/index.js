@@ -20,7 +20,7 @@ const server = createServer(app);
 
 
 // Setup Consciousness WebSocket endpoints
-const { setupSimpleConsciousnessWebSocket } = require('./simple-consciousness-websocket');
+import { setupSimpleConsciousnessWebSocket } from "./simple-consciousness-websocket.js";
 setupSimpleConsciousnessWebSocket(server);
 
 // Middleware
@@ -87,6 +87,11 @@ server.listen(PORT, () => {
 export default app;
 
 // Catch-all route for client-side routing
+// Conversations page route
+app.get('/conversations', (req, res) => {
+  res.sendFile(path.resolve(__dirname, './public/conversations.html'));
+});
+
 app.get('*', (req, res) => {
   // If this is an API route, return 404
   if (req.path.startsWith('/api/')) {
@@ -108,4 +113,5 @@ app.get('/auth/realms/featherweight/login-actions/registration', (req, res) => {
   // Redirect to home with a message
   res.redirect('https://app.featherweight.world/?registration=check_email');
 });
+
 

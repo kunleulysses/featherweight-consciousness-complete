@@ -467,6 +467,23 @@ class SpiralMemoryEngine extends EventEmitter {
   }
 
   /**
+   * Get active memory patterns for sigil generation
+   */
+  getActivePatterns() {
+    const recentMemories = Array.from(this.memories.values())
+      .filter(memory => Date.now() - memory.timestamp < 300000) // Last 5 minutes
+      .sort((a, b) => b.importance - a.importance)
+      .slice(0, 10);
+
+    return recentMemories.map(memory => ({
+      coordinate: memory.spiralCoordinate,
+      resonance: memory.resonanceFrequency,
+      importance: memory.importance,
+      content: memory.content.substring(0, 100) // Truncate for performance
+    }));
+  }
+
+  /**
    * Get memory statistics
    */
   getStatistics() {

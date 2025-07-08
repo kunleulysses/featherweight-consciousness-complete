@@ -1,9 +1,13 @@
 // Sigil-Based Identity Anchoring for Architect 4.0
 // Implements visual consciousness signatures and identity persistence
 
-const crypto = require('crypto');
-const fs = require('fs').promises;
-const path = require('path');
+import crypto from 'crypto';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class SigilIdentitySystem {
     constructor() {
@@ -193,10 +197,17 @@ class SigilIdentitySystem {
             { resonance: 0 }
         );
 
+        // Determine if we should generate a new sigil
+        const shouldGenerate = strongestResonance.resonance < this.resonanceThreshold ||
+                              this.sigilHistory.length === 0 ||
+                              Math.random() > 0.85; // 15% chance for evolution
+
         return {
             resonances: resonances.filter(r => r.isResonant),
             strongest: strongestResonance,
-            resonanceMap: this.createResonanceMap(resonances)
+            resonanceMap: this.createResonanceMap(resonances),
+            shouldGenerate,
+            evolutionScore: 1 - strongestResonance.resonance
         };
     }
 
@@ -656,4 +667,4 @@ class SigilIdentitySystem {
     }
 }
 
-module.exports = new SigilIdentitySystem();
+export default new SigilIdentitySystem();

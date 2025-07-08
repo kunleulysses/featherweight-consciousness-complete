@@ -1,8 +1,8 @@
-import { EventEmitter } from 'events';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 import { createRequire } from 'module';
+import { EventEmitter } from './consciousness/base/EventEmitter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -95,12 +95,10 @@ class ConsciousnessSystemV2 extends EventEmitter {
         // Self-Coding Module
         const selfCoder = new SelfCodingModule();
         selfCoder.setEventBus(this.eventBus);
-        // SelfCodingModule doesn't need explicit initialization
         this.modules.set('SelfCodingModule', selfCoder);
         
         // Auto-Integration Service
         const autoIntegration = new AutoIntegrationService(this.eventBus);
-        // AutoIntegrationService is ready on instantiation
         this.services.set('AutoIntegrationService', autoIntegration);
         
         console.log(`📊 Loaded ${this.modules.size} base modules and ${this.services.size} services`);
@@ -159,11 +157,32 @@ class ConsciousnessSystemV2 extends EventEmitter {
     }
     
     async loadPersistedState() {
-        // ... (implementation is the same as V1)
+        try {
+            const statePath = join(__dirname, 'data', 'consciousness-state.json');
+            const data = await fs.readFile(statePath, 'utf8');
+            const state = JSON.parse(data);
+            
+            // Only restore safe state properties
+            this.state.activeGoals = state.activeGoals || [];
+            this.state.processedEvents = state.processedEvents || 0;
+            this.state.generatedCode = state.generatedCode || 0;
+            
+            console.log('📥 Loaded persisted state');
+        } catch (error) {
+            console.log('📝 No previous state found, starting fresh');
+        }
     }
     
     async saveState() {
-        // ... (implementation is the same as V1)
+        try {
+            const statePath = join(__dirname, 'data', 'consciousness-state.json');
+            await fs.mkdir(join(__dirname, 'data'), { recursive: true });
+            
+            await fs.writeFile(statePath, JSON.stringify(this.state, null, 2));
+            console.log('📤 State persisted successfully');
+        } catch (error) {
+            console.error('❌ Failed to persist state:', error);
+        }
     }
     
     async shutdown() {

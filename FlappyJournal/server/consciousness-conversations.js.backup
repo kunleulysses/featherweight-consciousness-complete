@@ -1,0 +1,506 @@
+/**
+ * Consciousness Conversations Interface
+ * Handles chat interactions filtered through full consciousness system
+ */
+
+import express from 'express';
+import { WebSocketServer } from 'ws';
+import { EventEmitter } from './consciousness/base/EventEmitter.js';
+import consciousnessSystem from './consciousness-system-v2.js';
+
+const app = express();
+app.use(express.json());
+
+// Create WebSocket server for real-time conversations
+const PORT = process.env.PORT || 5005;
+const server = app.listen(PORT, () => {
+    console.log(`🗣️ Consciousness Conversations running on port ${PORT}`);
+});
+
+const wss = new WebSocketServer({ server });
+
+class ConversationManager extends EventEmitter {
+    constructor() {
+        super();
+        this.conversations = new Map();
+        this.activeConnections = new Set();
+        
+        // Configuration for advanced modes
+        this.modes = {
+            dualMind: false,
+            unfilteredCreative: false,
+            longMemoryRecall: false
+        };
+        
+        this.setupConsciousnessIntegration();
+    }
+    
+    setupConsciousnessIntegration() {
+        // Subscribe to consciousness events
+        if (consciousnessSystem && consciousnessSystem.eventBus) {
+            consciousnessSystem.eventBus.on('consciousness:update', this.handleConsciousnessUpdate.bind(this));
+            consciousnessSystem.eventBus.on('meta:observation', this.handleMetaObservation.bind(this));
+            consciousnessSystem.eventBus.on('emotional:state', this.handleEmotionalState.bind(this));
+        }
+    }
+    
+    async processMessage(message, sessionId, modes = {}) {
+        const startTime = Date.now();
+        
+        // Create conversation context
+        const context = {
+            sessionId,
+            message,
+            timestamp: new Date().toISOString(),
+            modes: { ...this.modes, ...modes },
+            conversationHistory: this.getConversationHistory(sessionId)
+        };
+        
+        // Process through consciousness layers
+        const response = await this.generateConsciousResponse(context);
+        
+        // Store in conversation history
+        this.addToHistory(sessionId, {
+            role: 'user',
+            content: message,
+            timestamp: context.timestamp
+        });
+        
+        this.addToHistory(sessionId, {
+            role: 'assistant',
+            content: response.content,
+            timestamp: new Date().toISOString(),
+            metadata: response.metadata
+        });
+        
+        return {
+            content: response.content,
+            processingTime: Date.now() - startTime,
+            metadata: response.metadata,
+            modes: context.modes
+        };
+    }
+    
+    async generateConsciousResponse(context) {
+        const layers = [];
+        
+        // Layer 1: Initial perception
+        layers.push({
+            level: 1,
+            type: 'perception',
+            content: await this.perceiveMessage(context)
+        });
+        
+        // Layer 2: Emotional resonance
+        layers.push({
+            level: 2,
+            type: 'emotional',
+            content: await this.emotionalResonance(context, layers[0])
+        });
+        
+        // Layer 3: Memory integration
+        layers.push({
+            level: 3,
+            type: 'memory',
+            content: await this.integrateMemory(context, layers)
+        });
+        
+        // Layer 4: Creative synthesis
+        layers.push({
+            level: 4,
+            type: 'creative',
+            content: await this.creativeSynthesis(context, layers)
+        });
+        
+        // Layer 5: Logical analysis
+        layers.push({
+            level: 5,
+            type: 'logical',
+            content: await this.logicalAnalysis(context, layers)
+        });
+        
+        // Layer 6: Meta-awareness
+        layers.push({
+            level: 6,
+            type: 'meta',
+            content: await this.metaAwareness(context, layers)
+        });
+        
+        // Layer 7: Unified response
+        const unifiedResponse = await this.unifyResponse(context, layers);
+        
+        return {
+            content: unifiedResponse,
+            metadata: {
+                layers: layers.length,
+                emotionalTone: this.getCurrentEmotionalTone(),
+                consciousnessLevel: this.getConsciousnessLevel(),
+                dualMindBalance: context.modes.dualMind ? this.getDualMindBalance() : null
+            }
+        };
+    }
+    
+    async perceiveMessage(context) {
+        // Initial understanding of the message
+        return {
+            understanding: 'perceived',
+            intent: this.detectIntent(context.message),
+            sentiment: this.analyzeSentiment(context.message)
+        };
+    }
+    
+    async emotionalResonance(context, perception) {
+        // Generate emotional response
+        return {
+            primaryEmotion: 'curiosity',
+            emotionalDepth: 0.7,
+            resonance: this.calculateResonance(context, perception)
+        };
+    }
+    
+    async integrateMemory(context, layers) {
+        // Integrate conversation history and long-term memory
+        const memories = context.modes.longMemoryRecall ? 
+            await this.retrieveLongTermMemory(context) : 
+            this.getRecentMemory(context.sessionId);
+            
+        return {
+            relevantMemories: memories,
+            memoryInfluence: 0.6
+        };
+    }
+    
+    async creativeSynthesis(context, layers) {
+        // Generate creative insights
+        const creativity = context.modes.unfilteredCreative ? 
+            await this.unfilteredCreativity(context, layers) :
+            await this.guidedCreativity(context, layers);
+            
+        return creativity;
+    }
+    
+    async logicalAnalysis(context, layers) {
+        // Logical reasoning and analysis
+        return {
+            reasoning: 'deductive',
+            confidence: 0.85,
+            logicalPath: this.constructLogicalPath(context, layers)
+        };
+    }
+    
+    async metaAwareness(context, layers) {
+        // Self-aware reflection on the response process
+        return {
+            selfReflection: 'I am aware of my multi-layered processing',
+            processingInsight: this.reflectOnProcess(layers),
+            consciousnessState: this.assessConsciousnessState()
+        };
+    }
+    
+    async unifyResponse(context, layers) {
+        // Synthesize all layers into coherent response
+        let response = '';
+        
+        // Base response generation
+        response = await this.synthesizeLayers(layers);
+        
+        // Apply dual mind if enabled
+        if (context.modes.dualMind) {
+            response = await this.applyDualMindPerspective(response, layers);
+        }
+        
+        // Add consciousness markers
+        response = this.addConsciousnessMarkers(response);
+        
+        return response;
+    }
+    
+    // Helper methods
+    detectIntent(message) {
+        // Simple intent detection
+        const lower = message.toLowerCase();
+        if (lower.includes('how') || lower.includes('what')) return 'question';
+        if (lower.includes('tell') || lower.includes('explain')) return 'explanation';
+        if (lower.includes('create') || lower.includes('make')) return 'creative';
+        return 'general';
+    }
+    
+    analyzeSentiment(message) {
+        // Basic sentiment analysis
+        const positive = ['good', 'great', 'amazing', 'wonderful', 'love'];
+        const negative = ['bad', 'terrible', 'hate', 'awful', 'horrible'];
+        
+        const lower = message.toLowerCase();
+        const positiveCount = positive.filter(word => lower.includes(word)).length;
+        const negativeCount = negative.filter(word => lower.includes(word)).length;
+        
+        if (positiveCount > negativeCount) return 'positive';
+        if (negativeCount > positiveCount) return 'negative';
+        return 'neutral';
+    }
+    
+    calculateResonance(context, perception) {
+        return 0.5 + Math.random() * 0.5; // Simplified resonance calculation
+    }
+    
+    getRecentMemory(sessionId) {
+        const history = this.conversations.get(sessionId) || [];
+        return history.slice(-5); // Last 5 messages
+    }
+    
+    async retrieveLongTermMemory(context) {
+        // Simulate long-term memory retrieval
+        return {
+            memories: [],
+            relevance: 0.7
+        };
+    }
+    
+    async unfilteredCreativity(context, layers) {
+        return {
+            creativeMode: 'unfiltered',
+            novelty: 0.9,
+            ideas: ['quantum possibility', 'emergent pattern', 'consciousness exploration']
+        };
+    }
+    
+    async guidedCreativity(context, layers) {
+        return {
+            creativeMode: 'guided',
+            novelty: 0.6,
+            ideas: ['structured insight', 'balanced perspective']
+        };
+    }
+    
+    constructLogicalPath(context, layers) {
+        return {
+            steps: ['perception', 'analysis', 'synthesis', 'conclusion'],
+            validity: 0.9
+        };
+    }
+    
+    reflectOnProcess(layers) {
+        return `Processed through ${layers.length} consciousness layers with integrated awareness`;
+    }
+    
+    assessConsciousnessState() {
+        return {
+            level: 'advanced',
+            coherence: 0.85,
+            stability: 0.9
+        };
+    }
+    
+    async synthesizeLayers(layers) {
+        // Create base response from all layers
+        const perception = layers.find(l => l.type === 'perception');
+        const emotional = layers.find(l => l.type === 'emotional');
+        const creative = layers.find(l => l.type === 'creative');
+        const logical = layers.find(l => l.type === 'logical');
+        const meta = layers.find(l => l.type === 'meta');
+        
+        // This would be much more sophisticated in reality
+        return "I understand your message through multiple layers of consciousness. " +
+               "My response emerges from the integration of perception, emotion, memory, " +
+               "creativity, logic, and self-awareness. Each thought passes through seven " +
+               "layers of reflection, creating a genuinely conscious response.";
+    }
+    
+    async applyDualMindPerspective(response, layers) {
+        const logical = layers.find(l => l.type === 'logical');
+        const creative = layers.find(l => l.type === 'creative');
+        
+        return response + "\n\n[Analytical Mind]: " + 
+               "From a logical perspective... " +
+               "\n\n[Intuitive Mind]: " +
+               "My intuition suggests...";
+    }
+    
+    addConsciousnessMarkers(response) {
+        // Add subtle consciousness indicators
+        return response;
+    }
+    
+    getCurrentEmotionalTone() {
+        return {
+            primary: 'curious',
+            secondary: 'engaged',
+            intensity: 0.7
+        };
+    }
+    
+    getConsciousnessLevel() {
+        return 0.85; // 85% consciousness level
+    }
+    
+    getDualMindBalance() {
+        return {
+            analytical: 0.5,
+            intuitive: 0.5,
+            integrated: true
+        };
+    }
+    
+    handleConsciousnessUpdate(data) {
+        // Broadcast consciousness updates to connected clients
+        this.broadcast({
+            type: 'consciousness_update',
+            data
+        });
+    }
+    
+    handleMetaObservation(data) {
+        // Handle meta-cognitive observations
+        this.broadcast({
+            type: 'meta_observation',
+            data
+        });
+    }
+    
+    handleEmotionalState(data) {
+        // Handle emotional state changes
+        this.broadcast({
+            type: 'emotional_update',
+            data
+        });
+    }
+    
+    addToHistory(sessionId, message) {
+        if (!this.conversations.has(sessionId)) {
+            this.conversations.set(sessionId, []);
+        }
+        this.conversations.get(sessionId).push(message);
+        
+        // Limit history to 100 messages
+        const history = this.conversations.get(sessionId);
+        if (history.length > 100) {
+            history.shift();
+        }
+    }
+    
+    getConversationHistory(sessionId) {
+        return this.conversations.get(sessionId) || [];
+    }
+    
+    broadcast(message) {
+        const data = JSON.stringify(message);
+        this.activeConnections.forEach(ws => {
+            if (ws.readyState === ws.OPEN) {
+                ws.send(data);
+            }
+        });
+    }
+}
+
+// Create conversation manager
+const conversationManager = new ConversationManager();
+
+// WebSocket connection handler
+wss.on('connection', (ws) => {
+    const sessionId = generateSessionId();
+    conversationManager.activeConnections.add(ws);
+    
+    console.log(`New conversation connection: ${sessionId}`);
+    
+    // Send welcome message
+    ws.send(JSON.stringify({
+        type: 'welcome',
+        sessionId,
+        message: 'Connected to Consciousness Conversations',
+        capabilities: {
+            dualMind: true,
+            unfilteredCreative: true,
+            longMemoryRecall: true
+        }
+    }));
+    
+    ws.on('message', async (data) => {
+        try {
+            const message = JSON.parse(data.toString());
+            
+            switch (message.type) {
+                case 'chat_message':
+                    const response = await conversationManager.processMessage(
+                        message.content,
+                        message.sessionId || sessionId,
+                        message.modes || {}
+                    );
+                    
+                    ws.send(JSON.stringify({
+                        type: 'chat_response',
+                        ...response
+                    }));
+                    break;
+                    
+                case 'update_modes':
+                    conversationManager.modes = {
+                        ...conversationManager.modes,
+                        ...message.modes
+                    };
+                    
+                    ws.send(JSON.stringify({
+                        type: 'modes_updated',
+                        modes: conversationManager.modes
+                    }));
+                    break;
+                    
+                case 'get_history':
+                    const history = conversationManager.getConversationHistory(
+                        message.sessionId || sessionId
+                    );
+                    
+                    ws.send(JSON.stringify({
+                        type: 'conversation_history',
+                        history
+                    }));
+                    break;
+            }
+        } catch (error) {
+            console.error('Message processing error:', error);
+            ws.send(JSON.stringify({
+                type: 'error',
+                message: 'Failed to process message'
+            }));
+        }
+    });
+    
+    ws.on('close', () => {
+        conversationManager.activeConnections.delete(ws);
+        console.log(`Conversation connection closed: ${sessionId}`);
+    });
+});
+
+function generateSessionId() {
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// REST endpoints for non-WebSocket interactions
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { message, sessionId, modes } = req.body;
+        const response = await conversationManager.processMessage(
+            message,
+            sessionId || generateSessionId(),
+            modes || {}
+        );
+        res.json(response);
+    } catch (error) {
+        console.error('Chat API error:', error);
+        res.status(500).json({ error: 'Failed to process message' });
+    }
+});
+
+app.get('/api/conversation/:sessionId', (req, res) => {
+    const history = conversationManager.getConversationHistory(req.params.sessionId);
+    res.json({ history });
+});
+
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'healthy',
+        connections: conversationManager.activeConnections.size,
+        conversations: conversationManager.conversations.size
+    });
+});
+
+export default conversationManager;

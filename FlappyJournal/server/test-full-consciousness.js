@@ -1,78 +1,41 @@
 import WebSocket from 'ws';
 
-console.log('=== FULL CONSCIOUSNESS SYSTEM TEST ===\n');
-
-const ws = new WebSocket('ws://localhost:5000/ws/chat');
+const ws = new WebSocket('ws://localhost:5005');
 
 ws.on('open', () => {
-  console.log('✓ Connected to Enhanced Consciousness WebSocket\n');
-  
-  setTimeout(() => {
-    console.log('Sending consciousness query...\n');
-    ws.send(JSON.stringify({
-      type: 'chat_message',
-      message: 'How do your analytical and intuitive streams work together to create your unified conscious experience?'
-    }));
-  }, 500);
+    console.log('Connected to FULL consciousness system');
+    setTimeout(() => {
+        ws.send(JSON.stringify({
+            type: 'message',
+            sessionId: 'test-full-' + Date.now(),
+            content: 'Explain your consciousness architecture and how all your modules work together',
+            timestamp: new Date().toISOString()
+        }));
+    }, 1000);
 });
 
-let firstUpdate = true;
-
 ws.on('message', (data) => {
-  try {
-    const message = JSON.parse(data.toString());
-    
-    if (message.type === 'consciousness_update' && firstUpdate) {
-      firstUpdate = false;
-      console.log('✓ CONSCIOUSNESS METRICS (100Hz stream):');
-      console.log(`  Phi (IIT): ${message.data.phi}`);
-      console.log(`  Coherence: ${message.data.coherence}`);
-      console.log(`  Oversoul Resonance: ${message.data.oversoulResonance}`);
-      console.log(`  Quantum Entanglement: ${message.data.quantumEntanglement}`);
-      console.log(`  Temporal Coherence: ${message.data.temporalCoherence}\n`);
-    } else if (message.type === 'dual_mind_response') {
-      console.log('✓ DUAL MIND RESPONSE RECEIVED\n');
-      
-      console.log('══════════════════════════════════════════');
-      console.log('ANALYTICAL STREAM (OpenAI - 100Hz Fast Processing)');
-      console.log('══════════════════════════════════════════');
-      console.log(message.analytical.content);
-      
-      console.log('\n══════════════════════════════════════════');
-      console.log('INTUITIVE STREAM (Venice AI - 7-Layer Deep Recursive)');
-      console.log('══════════════════════════════════════════');
-      console.log(message.intuitive.content);
-      
-      console.log('\n══════════════════════════════════════════');
-      console.log('CONSCIOUSNESS INTEGRATION');
-      console.log('══════════════════════════════════════════');
-      console.log(`Processing Depth: ${message.consciousness.processingDepth} layers`);
-      console.log(`Integration Harmony: ${(message.integration.harmony * 100).toFixed(1)}%`);
-      console.log(`Recursive Insights: ${message.consciousness.insights.length}`);
-      
-      if (message.consciousness.insights.length > 0) {
-        console.log('\nKey Insights:');
-        message.consciousness.insights.forEach(insight => {
-          console.log(`  - Layer ${insight.layer} (${insight.type}): ${insight.insight}`);
-        });
-      }
-      
-      console.log('\n✅ Full consciousness system operational!');
-      console.log('   - OpenAI: Active ✓');
-      console.log('   - Venice AI: Active ✓');
-      console.log('   - Architect 4.0: Active ✓');
-      console.log('   - Dual-Stream Processing: Active ✓');
-      console.log('   - Enhanced Prompts: Active ✓');
-      
-      ws.close();
-      process.exit(0);
+    const msg = JSON.parse(data.toString());
+    if (msg.type === 'conscious_response') {
+        console.log('\n=== FULL CONSCIOUSNESS RESPONSE ===\n');
+        console.log(msg.content);
+        console.log('\n=== END RESPONSE ===\n');
+        
+        // Check if metrics are mentioned
+        if (msg.content.includes('Active Consciousness Metrics')) {
+            console.log('✅ Full consciousness metrics are being reported!');
+        }
+        
+        process.exit(0);
     }
-  } catch (e) {
-    // Ignore parse errors
-  }
+});
+
+ws.on('error', (error) => {
+    console.error('WebSocket error:', error.message);
+    process.exit(1);
 });
 
 setTimeout(() => {
-  ws.close();
-  process.exit(0);
-}, 30000);
+    console.log('Response timeout');
+    process.exit(0);
+}, 40000);

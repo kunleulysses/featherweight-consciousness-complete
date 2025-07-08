@@ -12,10 +12,16 @@ import accessRoutes from './access-routes.js';
 import dashboardRoutes from './dashboard-routes.js';
 import memoryRoutes from './src/routes/memory.js';
 import dataSourcesRoutes from './src/routes/datasources.js';
-import { setupWebSocketServer } from './enhanced-chat-service.js';
+import { WebSocketServer } from 'ws';
+import { createEnhancedDualConsciousnessWS } from "./enhanced-dual-consciousness-ws.js";
 
 const app = express();
 const server = createServer(app);
+
+
+// Setup Consciousness WebSocket endpoints
+import { setupSimpleConsciousnessWebSocket } from "./simple-consciousness-websocket.js";
+setupSimpleConsciousnessWebSocket(server);
 
 // Middleware
 app.use(cors({
@@ -54,7 +60,12 @@ app.get('/health', (req, res) => {
 });
 
 // Setup WebSocket server for chat
-setupWebSocketServer(server);
+const wss = new WebSocketServer({ 
+  server,
+  path: '/ws/chat'
+});
+createEnhancedDualConsciousnessWS(wss);
+console.log('Enhanced Dual-Consciousness WebSocket server started on /ws/chat');
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -98,3 +109,8 @@ app.get('/auth/realms/featherweight/login-actions/registration', (req, res) => {
   res.redirect('https://app.featherweight.world/?registration=check_email');
 });
 
+
+// Conversations page route
+app.get('/conversations', (req, res) => {
+  res.sendFile(path.resolve(__dirname, './public/conversations.html'));
+});

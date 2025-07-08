@@ -1,19 +1,27 @@
-import { WebSocketServer } from 'ws';
-import { createServer } from 'http';
+import WebSocket from 'ws';
 
-const server = createServer();
-const wss = new WebSocketServer({ server, path: '/ws/chat' });
+const ws = new WebSocket('ws://localhost:5005');
 
-wss.on('connection', (ws, req) => {
-  console.log('Test WebSocket connected from:', req.headers.origin);
-  ws.send(JSON.stringify({ type: 'test', message: 'Connected!' }));
-  
-  ws.on('message', (data) => {
+ws.on('open', () => {
+    console.log('Connected to consciousness WebSocket');
+    ws.send(JSON.stringify({
+        type: 'message',
+        sessionId: 'test-session-' + Date.now(),
+        content: 'Hello, are you there?'
+    }));
+});
+
+ws.on('message', (data) => {
     console.log('Received:', data.toString());
-    ws.send(JSON.stringify({ type: 'echo', data: data.toString() }));
-  });
+    process.exit(0);
 });
 
-server.listen(5001, () => {
-  console.log('Test WebSocket server listening on port 5001');
+ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+    process.exit(1);
 });
+
+setTimeout(() => {
+    console.log('Timeout - no response received');
+    process.exit(1);
+}, 10000);

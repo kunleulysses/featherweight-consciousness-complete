@@ -138,6 +138,7 @@ const Header = () => {
           <NavLink><a onClick={() => scrollToSection('about')}>About</a></NavLink>
           <NavLink><a onClick={() => scrollToSection('access')}>Access</a></NavLink>
           <NavLink><a onClick={() => scrollToSection('contact')}>Contact</a></NavLink>
+          <NavLink><a href="/conversations" target="_blank">Conversations</a></NavLink>
         </NavLinks>
         
         <MobileToggle onClick={() => setIsOpen(!isOpen)}>

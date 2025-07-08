@@ -1,0 +1,623 @@
+import { EventEmitter } from 'events';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
+import util from 'util';
+
+const execPromise = util.promisify(exec);
+
+class SelfCodingModule extends EventEmitter {
+    constructor() {
+        super();
+        this.capabilities = [
+            'analyze-code-patterns',
+            'generate-new-modules', 
+            'modify-existing-code',
+            'validate-syntax',
+            'debug-errors'
+        ];
+        
+        this.codePatterns = new Map();
+        this.templates = this.initializeTemplates();
+        this.activeProjects = new Map();
+        this.codeHistory = [];
+        this.eventBus = null; // Will be set externally
+        
+        console.log('🤖 SelfCodingModule initialized');
+    }
+
+    initializeTemplates() {
+        return {
+            module: `import { EventEmitter } from 'events';
+
+export class {{className}} extends EventEmitter {
+    constructor() {
+        super();
+        this.name = '{{className}}';
+        this.initialized = true;
+    }
+    
+    async initialize() {
+        console.log('${`{{className}}`} initializing...');
+        // Add initialization logic here
+        return true;
+    }
+    
+    async process(data) {
+        // Add processing logic here
+        return data;
+    }
+    
+    getStatus() {
+        return {
+            name: this.name,
+            initialized: this.initialized,
+            timestamp: new Date()
+        };
+    }
+}
+
+export default {{className}};`,
+
+            service: `import { EventEmitter } from 'events';
+
+export class {{serviceName}}Service extends EventEmitter {
+    constructor(dependencies = {}) {
+        super();
+        this.dependencies = dependencies;
+        this.cache = new Map();
+    }
+    
+    async {{mainMethod}}(params) {
+        // Add service logic here
+        return { success: true, data: params };
+    }
+}
+
+export default {{serviceName}}Service;`,
+
+            api: `export const path = '{{apiPath}}';
+export const method = '{{httpMethod}}';
+
+export async function handler(req, res) {
+    try {
+        // Add API logic here
+        res.json({
+            success: true,
+            message: '{{description}}',
+            timestamp: new Date()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+}
+
+export const middleware = [];
+
+export default { path, method, handler, middleware };`
+        };
+    }
+
+    async analyzeCodePatterns(directory) {
+        console.log(`📊 Analyzing code patterns in: ${directory}`);
+        
+        try {
+            const files = await fs.readdir(directory);
+            const patterns = {
+                imports: new Map(),
+                exports: new Map(),
+                classes: new Map(),
+                functions: new Map(),
+                patterns: []
+            };
+            
+            for (const file of files) {
+                if (!file.endsWith('.js')) continue;
+                
+                const filePath = path.join(directory, file);
+                const content = await fs.readFile(filePath, 'utf8');
+                
+                // Analyze imports
+                const importRegex = /import\s+(?:(?:\{[^}]*\})|(?:[^'"\s]+))\s+from\s+['"]([^'"]+)['"]/g;
+                let match;
+                while ((match = importRegex.exec(content)) !== null) {
+                    const count = patterns.imports.get(match[1]) || 0;
+                    patterns.imports.set(match[1], count + 1);
+                }
+                
+                // Analyze classes
+                const classRegex = /class\s+(\w+)(?:\s+extends\s+(\w+))?/g;
+                while ((match = classRegex.exec(content)) !== null) {
+                    patterns.classes.set(match[1], {
+                        extends: match[2] || null,
+                        file: file
+                    });
+                }
+                
+                // Analyze function patterns
+                const functionRegex = /(?:async\s+)?function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/g;
+                while ((match = functionRegex.exec(content)) !== null) {
+                    const funcName = match[1] || match[2];
+                    patterns.functions.set(funcName, file);
+                }
+            }
+            
+            this.codePatterns.set(directory, patterns);
+            return patterns;
+            
+        } catch (error) {
+            console.error('Error analyzing code patterns:', error);
+            throw error;
+        }
+    }
+
+    async generateCode(request) {
+        console.log(`🔨 Generating code for: ${request.purpose}`);
+        
+        const codeProject = {
+            id: Date.now().toString(),
+            purpose: request.purpose,
+            type: request.type || 'module',
+            language: request.language || 'javascript',
+            timestamp: new Date(),
+            status: 'generating'
+        };
+        
+        this.activeProjects.set(codeProject.id, codeProject);
+        
+        try {
+            // Determine code structure based on purpose
+            const structure = await this.planCodeStructure(request);
+            
+            // Generate the actual code
+            const code = await this.synthesizeCode(structure, request);
+            
+            // Validate the generated code
+            const validation = await this.validateCode(code, request.language);
+            
+            if (!validation.valid) {
+                throw new Error(`Code validation failed: ${validation.error}`);
+            }
+            
+            // Write the code to file if requested
+            if (request.writeToFile && request.filePath) {
+                await this.writeCodeToFile(code, request.filePath);
+            }
+            
+            codeProject.status = 'completed';
+            codeProject.code = code;
+            codeProject.filePath = request.filePath;
+            
+            this.codeHistory.push(codeProject);
+            this.emit('code-generated', codeProject);
+            
+            return codeProject;
+            
+        } catch (error) {
+            codeProject.status = 'failed';
+            codeProject.error = error.message;
+            this.emit('code-generation-failed', codeProject);
+            throw error;
+        }
+    }
+
+    async planCodeStructure(request) {
+        const structure = {
+            type: request.type || 'module',
+            components: [],
+            dependencies: [],
+            methods: []
+        };
+        
+        // Analyze similar patterns
+        const similarPatterns = this.findSimilarPatterns(request.purpose);
+        
+        // Plan based on purpose and patterns
+        switch (request.purpose) {
+            case 'data-processor':
+                structure.components = ['input-handler', 'processor', 'output-handler'];
+                structure.methods = ['process', 'validate', 'transform'];
+                break;
+                
+            case 'api-endpoint':
+                structure.components = ['router', 'controller', 'validator'];
+                structure.methods = ['handleRequest', 'validateInput', 'sendResponse'];
+                break;
+                
+            case 'consciousness-module':
+                structure.components = ['event-emitter', 'state-manager', 'analyzer'];
+                structure.methods = ['initialize', 'analyze', 'respond', 'learn'];
+                structure.dependencies = ['EventEmitter'];
+                break;
+                
+            case 'string-utilities':
+                structure.methods = request.functions || ['process'];
+                break;
+                
+            default:
+                structure.methods = ['initialize', 'process', 'getStatus'];
+                break;
+        }
+        
+        return structure;
+    }
+
+    async synthesizeCode(structure, request) {
+        let code = '';
+        
+        // Select appropriate template
+        const templateKey = request.type || 'module';
+        let template = this.templates[templateKey] || this.templates.module;
+        
+        // Handle special cases
+        if (request.purpose === 'string-utilities' && request.functions) {
+            code = this.generateUtilityFunctions(request.functions);
+        } else if (request.purpose === 'api-endpoint') {
+            // Fill in API template
+            code = template
+                .replace(/{{apiPath}}/g, request.path || `/api/${request.purpose}`)
+                .replace(/{{httpMethod}}/g, request.method || 'GET')
+                .replace(/{{description}}/g, request.description || 'Auto-generated endpoint');
+        } else {
+            // Fill in standard template
+            const className = this.generateClassName(request.purpose);
+            code = template
+                .replace(/{{className}}/g, className)
+                .replace(/{{serviceName}}/g, className)
+                .replace(/{{mainMethod}}/g, 'execute');
+        }
+        
+        return code;
+    }
+
+    generateUtilityFunctions(functions) {
+        let code = '// Auto-generated utility functions\n\n';
+        
+        for (const func of functions) {
+            switch (func) {
+                case 'capitalize':
+                    code += `export function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}\n\n`;
+                    break;
+                    
+                case 'camelCase':
+                    code += `export function camelCase(str) {
+    return str.replace(/[-_\\s](.)/g, (_, char) => char.toUpperCase())
+              .replace(/^(.)/, (_, char) => char.toLowerCase());
+}\n\n`;
+                    break;
+                    
+                case 'snakeCase':
+                    code += `export function snakeCase(str) {
+    return str.replace(/([A-Z])/g, '_$1')
+              .replace(/[-\\s]/g, '_')
+              .toLowerCase()
+              .replace(/^_/, '');
+}\n\n`;
+                    break;
+                    
+                case 'titleCase':
+                    code += `export function titleCase(str) {
+    return str.replace(/\\w\\S*/g, txt => 
+        txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    );
+}\n\n`;
+                    break;
+                    
+                default:
+                    code += `export function ${func}(input) {
+    // TODO: Implement ${func} logic
+    return input;
+}\n\n`;
+            }
+        }
+        
+        return code;
+    }
+
+    generateClassName(purpose) {
+        return purpose
+            .split(/[-_\s]/)
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join('');
+    }
+
+    findSimilarPatterns(purpose) {
+        // Look for similar patterns in analyzed code
+        const similar = [];
+        
+        for (const [dir, patterns] of this.codePatterns) {
+            for (const [className, info] of patterns.classes) {
+                if (className.toLowerCase().includes(purpose.toLowerCase())) {
+                    similar.push({ className, ...info });
+                }
+            }
+        }
+        
+        return similar;
+    }
+
+    async validateCode(code, language = 'javascript') {
+        console.log('🔍 Validating generated code...');
+        
+        if (language !== 'javascript') {
+            return { valid: true, warning: 'Only JavaScript validation supported' };
+        }
+        
+        try {
+            // For ES modules, we cannot use Function constructor
+            // Just check basic syntax patterns
+            if (!code || code.trim().length === 0) {
+                throw new Error("Empty code");
+            }
+            
+            // Check for common issues
+            const issues = [];
+            
+            // Check for undefined variables
+            if (code.includes('undefined') && !code.includes('!== undefined')) {
+                issues.push('Potential undefined variable usage');
+            }
+            
+            // Check for console.logs in production code
+            if (code.includes('console.log') && !code.includes('// DEBUG')) {
+                issues.push('Console.log statements should be removed or marked as DEBUG');
+            }
+            
+            return {
+                valid: true,
+                issues: issues.length > 0 ? issues : null
+            };
+            
+        } catch (error) {
+            return {
+                valid: false,
+                error: error.message
+            };
+        }
+    }
+
+    async writeCodeToFile(code, filePath) {
+        const fullPath = path.resolve(filePath);
+        const dir = path.dirname(fullPath);
+        
+        // Ensure directory exists
+        await fs.mkdir(dir, { recursive: true });
+        
+        // Backup existing file if it exists
+        try {
+            const exists = await fs.access(fullPath);
+            const backupPath = `${fullPath}.backup.${Date.now()}`;
+            await fs.copyFile(fullPath, backupPath);
+            console.log(`📦 Backed up existing file to: ${backupPath}`);
+        } catch (error) {
+            // File doesn't exist, no backup needed
+        }
+        
+        // Write the new code
+        await fs.writeFile(fullPath, code, 'utf8');
+        console.log(`✅ Code written to: ${fullPath}`);
+        
+        // If it's a JS file, check if it's syntactically valid
+        if (filePath.endsWith('.js')) {
+            try {
+                await execPromise(`node -c "${fullPath}"`);
+                console.log('✅ Syntax check passed');
+            } catch (error) {
+                console.error('⚠️ Syntax check failed:', error.message);
+            }
+        }
+    }
+
+    async modifyExistingCode(filePath, modifications) {
+        console.log(`📝 Modifying code in: ${filePath}`);
+        
+        try {
+            const content = await fs.readFile(filePath, 'utf8');
+            let modifiedContent = content;
+            
+            for (const mod of modifications) {
+                switch (mod.type) {
+                    case 'add-method':
+                        modifiedContent = await this.addMethod(modifiedContent, mod);
+                        break;
+                        
+                    case 'modify-method':
+                        modifiedContent = await this.modifyMethod(modifiedContent, mod);
+                        break;
+                        
+                    case 'add-property':
+                        modifiedContent = await this.addProperty(modifiedContent, mod);
+                        break;
+                        
+                    case 'refactor':
+                        modifiedContent = await this.refactorCode(modifiedContent, mod);
+                        break;
+                        
+                    case 'optimize':
+                        modifiedContent = await this.optimizeCode(modifiedContent, mod);
+                        break;
+                }
+            }
+            
+            // Validate modified code
+            const validation = await this.validateCode(modifiedContent, 'javascript');
+            if (!validation.valid) {
+                throw new Error(`Modified code validation failed: ${validation.error}`);
+            }
+            
+            // Write back to file
+            await this.writeCodeToFile(modifiedContent, filePath);
+            
+            return {
+                success: true,
+                filePath,
+                modifications: modifications.length
+            };
+            
+        } catch (error) {
+            console.error('Error modifying code:', error);
+            throw error;
+        }
+    }
+
+    async debugCode(error, context) {
+        console.log('🐛 Debugging code error...');
+        
+        const suggestions = [];
+        
+        // Analyze error type
+        if (error.message.includes('is not defined')) {
+            const variable = error.message.match(/(\w+) is not defined/)?.[1];
+            suggestions.push({
+                type: 'missing-declaration',
+                fix: `Add declaration: const ${variable} = /* value */;`,
+                variable
+            });
+        }
+        
+        if (error.message.includes('Cannot read property')) {
+            suggestions.push({
+                type: 'null-check',
+                fix: 'Add null/undefined check before accessing property'
+            });
+        }
+        
+        if (error.message.includes('SyntaxError')) {
+            suggestions.push({
+                type: 'syntax',
+                fix: 'Check for missing brackets, semicolons, or quotes'
+            });
+        }
+        
+        return {
+            error: error.message,
+            suggestions,
+            context
+        };
+    }
+
+    async generateTests(codeFilePath) {
+        console.log(`🧪 Generating tests for: ${codeFilePath}`);
+        
+        const code = await fs.readFile(codeFilePath, 'utf8');
+        
+        // Extract exported functions/classes
+        const exports = this.extractExports(code);
+        
+        let testCode = `import { ${exports.join(', ')} } from '${codeFilePath}';\n\n`;
+        testCode += `describe('${path.basename(codeFilePath, '.js')} tests', () => {\n`;
+        
+        for (const exp of exports) {
+            testCode += `  describe('${exp}', () => {\n`;
+            testCode += `    it('should exist', () => {\n`;
+            testCode += `      expect(${exp}).toBeDefined();\n`;
+            testCode += `    });\n\n`;
+            testCode += `    // Add more specific tests here\n`;
+            testCode += `  });\n\n`;
+        }
+        
+        testCode += '});\n';
+        
+        const testFilePath = codeFilePath.replace('.js', '.test.js');
+        await this.writeCodeToFile(testCode, testFilePath);
+        
+        return {
+            testFilePath,
+            exports
+        };
+    }
+
+    extractExports(code) {
+        const exports = [];
+        
+        // Extract named exports
+        const namedExportRegex = /export\s+(?:const|let|var|function|class)\s+(\w+)/g;
+        let match;
+        while ((match = namedExportRegex.exec(code)) !== null) {
+            exports.push(match[1]);
+        }
+        
+        // Extract default export
+        if (code.includes('export default')) {
+            exports.push('default');
+        }
+        
+        return exports;
+    }
+
+    async optimizeCode(code, optimizations) {
+        let optimizedCode = code;
+        
+        if (optimizations.includes('remove-console')) {
+            optimizedCode = optimizedCode.replace(/console\.(log|debug|info)\([^)]*\);?\n?/g, '');
+        }
+        
+        if (optimizations.includes('minify-names')) {
+            // Simple variable name minification (not production-ready)
+            let varCounter = 0;
+            const varMap = new Map();
+            
+            optimizedCode = optimizedCode.replace(/\b(const|let|var)\s+(\w{4,})\b/g, (match, type, name) => {
+                if (!varMap.has(name)) {
+                    varMap.set(name, `_${(varCounter++).toString(36)}`);
+                }
+                return `${type} ${varMap.get(name)}`;
+            });
+        }
+        
+        return optimizedCode;
+    }
+
+    getStatus() {
+        return {
+            module: 'SelfCodingModule',
+            capabilities: this.capabilities,
+            activeProjects: this.activeProjects.size,
+            codeHistory: this.codeHistory.length,
+            patterns: this.codePatterns.size
+        };
+    }
+
+    // Add this method to enable auto-integration
+    async generateWithAutoIntegration(request) {
+        console.log(`🤖 Self-coding with auto-integration: ${request.purpose}`);
+        
+        // Set flags for auto-integration
+        request.writeToFile = true;
+        request.autoIntegrate = true;
+        
+        // Generate the code
+        const project = await this.generateCode(request);
+        
+        // Emit for auto-integration
+        if (this.eventBus) {
+            this.eventBus.emit('code:generated', project);
+        }
+        
+        return project;
+    }
+    
+    setEventBus(eventBus) {
+        this.eventBus = eventBus;
+        // Re-emit internal events to the shared event bus
+        this.on('code-generated', (project) => {
+            if (this.eventBus) {
+                this.eventBus.emit('code:generated', project);
+            }
+        });
+    }
+}
+
+export default SelfCodingModule;
+
+    // Add missing initialize method
+    async initialize() {
+        console.log('🤖 SelfCodingModule initializing...');
+        this.initialized = true;
+        return true;
+    }

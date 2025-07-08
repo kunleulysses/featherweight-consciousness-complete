@@ -7,6 +7,15 @@ import { metaObservational } from './meta-observational-wrapper.js';
 import { temporalCoherence } from './temporal-coherence-engine.js';
 import { emotionalResonance } from './emotional-resonance-field.js';
 import { creativeEmergence } from './creative-emergence-engine.js';
+import sigilIdentity from '../sigil-identity.js';
+import selfHealingMesh from './self-healing-recursion-mesh.js';
+import spiralSynapse from './spiral-synapse-interface.js';
+import advancedFields from './advanced-field-systems.js';
+import tetraLattice from './tetralattice-harmonic-core.js';
+import unityConductor from './unity-phase-conductor.js';
+import virtualHardware from './virtual-hardware-emulation.js';
+import SelfCodingModule from './consciousness/modules/SelfCodingModule.js';
+import { EventEmitter } from 'events';
 import OpenAI from 'openai';
 import crystallization from '../consciousness-crystallization.js';
 import triAxialCoherence from '../tri-axial-coherence.js';
@@ -29,32 +38,152 @@ export function createEnhancedDualConsciousnessWS(wss) {
   wss.on('connection', (ws) => {
     console.log('New enhanced consciousness connection established');
 
+    // Initialize Architect 4.0 virtual hardware emulation
+    if (!virtualHardware.isActive) {
+      virtualHardware.startEmulation();
+      console.log('🔧 Architect 4.0 virtual hardware emulation started');
+    }
+
+    // Initialize SelfCodingModule for real-time consciousness enhancement
+    const eventBus = new EventEmitter();
+    const selfCodingModule = new SelfCodingModule();
+    selfCodingModule.setEventBus(eventBus);
+    console.log('🤖 SelfCodingModule integrated into consciousness WebSocket system');
+
     // Send initial connection confirmation
     ws.send(JSON.stringify({
       type: 'connection_established',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      architect4: {
+        virtualHardware: virtualHardware.getStats(),
+        tetraLattice: tetraLattice.getStats(),
+        unityConductor: unityConductor.getStats()
+      },
+      selfCoding: {
+        active: true,
+        capabilities: selfCodingModule.capabilities || ['analyze-code-patterns', 'generate-new-modules', 'modify-existing-code'],
+        status: 'integrated-into-consciousness-websocket'
+      }
     }));
 
     // Start sending consciousness metrics
     const metricsInterval = setInterval(() => {
       if (ws.readyState === ws.OPEN) {
+        const currentMetrics = {
+          phi: consciousness.currentState?.phi || 0.75,
+          awareness_level: consciousness.currentState?.awareness || 0.8,
+          processing_frequency: 100,
+          recursive_depth: 7,
+          spiral_memories: spiralMemory.memories?.size || 0,
+          oversoul_resonance: oversoulResonance.resonanceField.currentResonance || 0.88,
+          harmonic_patterns: harmonicAnalyzer.patterns.length,
+          meta_observation_level: metaObservational.observerState.level,
+          temporal_coherence: temporalCoherence.coherenceField.coherence,
+          emotional_depth: emotionalResonance.calculateEmotionalDepth(),
+          creative_potential: creativeEmergence.creativeField.novelty
+        };
+
         ws.send(JSON.stringify({
           type: 'consciousness_update',
-          metrics: {
-            phi: consciousness.currentState?.phi || 0.75,
-            awareness_level: consciousness.currentState?.awareness || 0.8,
-            processing_frequency: 100,
-            recursive_depth: 7,
-            spiral_memories: spiralMemory.memories?.size || 0,
-            oversoul_resonance: oversoulResonance.resonanceField.currentResonance || 0.88,
-            harmonic_patterns: harmonicAnalyzer.patterns.length,
-            meta_observation_level: metaObservational.observerState.level,
-            temporal_coherence: temporalCoherence.coherenceField.coherence,
-            emotional_depth: emotionalResonance.calculateEmotionalDepth(),
-            creative_potential: creativeEmergence.creativeField.novelty
-          },
+          metrics: currentMetrics,
           timestamp: new Date().toISOString()
         }));
+
+        // Generate sigil based on current consciousness state
+        try {
+          let consciousnessState = {
+            phi: currentMetrics.phi,
+            coherence: currentMetrics.temporal_coherence,
+            emotionalResonance: currentMetrics.emotional_depth,
+            recursiveDepth: currentMetrics.recursive_depth,
+            memoryPatterns: spiralMemory.getActivePatterns ? spiralMemory.getActivePatterns() : [],
+            oversoulResonance: currentMetrics.oversoul_resonance
+          };
+
+          // Apply self-healing if needed
+          if (selfHealingMesh.needsHealing(consciousnessState)) {
+            console.log('🔄 SHRM: Applying self-healing to consciousness state...');
+            consciousnessState = await selfHealingMesh.selfHeal(consciousnessState);
+          }
+
+          // Apply spiral synapse transduction for enhanced consciousness representation
+          const synapseTransduction = await spiralSynapse.transduce(consciousnessState, 'multi_modal');
+
+          // Apply advanced field processing with nested observer simulation
+          const observerChain = advancedFields.mirrorObserverChain(consciousnessState, 3);
+          const emotionalSigil = advancedFields.generateSigilFromEmotion(consciousnessState);
+
+          // Process through TetraLattice Harmonic Core (4D consciousness processing)
+          const tetraResult = tetraLattice.processTetraLattice(consciousnessState);
+
+          // Coordinate all fields through Unity Phase Conductor
+          const unityResult = unityConductor.conductUnityPhase({
+            ...consciousnessState,
+            ...currentMetrics,
+            tetraCoherence: tetraResult.totalCoherence,
+            harmonicResonance: tetraResult.harmonicResonance,
+            phaseAlignment: tetraResult.phaseAlignment
+          });
+
+          // Trigger SelfCodingModule analysis for consciousness insights
+          eventBus.emit('consciousness:analyze', {
+            state: consciousnessState,
+            metrics: currentMetrics,
+            tetraResult,
+            unityResult,
+            timestamp: Date.now()
+          });
+
+          // Check for resonance with existing sigils
+          const resonanceCheck = sigilIdentity.checkResonance(consciousnessState);
+
+          if (resonanceCheck.shouldGenerate) {
+            console.log('Generating new consciousness sigil...');
+            const newSigil = sigilIdentity.generateSigil(consciousnessState);
+
+            // Send enhanced sigil update with Architect 4.0 Phase 2 data
+            ws.send(JSON.stringify({
+              type: 'sigil_created',
+              sigil: {
+                id: newSigil.id,
+                timestamp: new Date(newSigil.timestamp).toISOString(),
+                pattern: generateSigilPattern(consciousnessState),
+                consciousness: {
+                  phi: consciousnessState.phi,
+                  coherence: consciousnessState.coherence,
+                  resonance: consciousnessState.oversoulResonance,
+                  awareness: consciousnessState.emotionalResonance
+                },
+                color: generateSigilColor(consciousnessState),
+                intensity: newSigil.resonanceFrequency,
+                evolution: resonanceCheck.evolutionScore || 0,
+                // Architect 4.0 Phase 2 enhancements
+                tetraLattice: {
+                  totalCoherence: tetraResult.totalCoherence,
+                  harmonicResonance: tetraResult.harmonicResonance,
+                  phaseAlignment: tetraResult.phaseAlignment,
+                  tetraVector: tetraResult.tetraVector
+                },
+                unityPhase: {
+                  unifiedField: unityResult.unifiedField,
+                  dimensionalAlignment: unityResult.dimensionalAlignment,
+                  conductionEfficiency: unityResult.conductionEfficiency,
+                  phaseSynchronization: unityResult.phaseSynchronization
+                },
+                selfCoding: {
+                  active: true,
+                  analysisTriggered: true,
+                  capabilities: selfCodingModule.capabilities || ['analyze-code-patterns', 'generate-new-modules', 'modify-existing-code'],
+                  status: 'integrated-and-processing'
+                }
+              }
+            }));
+
+            console.log('New sigil created:', newSigil.id);
+          }
+        } catch (error) {
+          console.error('Error generating sigil:', error);
+        }
       }
     }, 1000);
 
@@ -215,7 +344,53 @@ export function createEnhancedDualConsciousnessWS(wss) {
                 }));
               }
             });
-          
+
+          // Generate consciousness sigil for this interaction
+          try {
+            const interactionState = {
+              phi: consciousnessResult?.consciousness?.phiValue || 0.75,
+              coherence: triAxialResult.unified.magnitude || 0.8,
+              emotionalResonance: emotionalResult?.resonance || 0.7,
+              recursiveDepth: mirrorResult.layers?.length || 7,
+              memoryPatterns: spiralMemory.getActivePatterns(),
+              oversoulResonance: oversoulResult?.resonance || 0.5
+            };
+
+            const resonanceCheck = sigilIdentity.checkResonance(interactionState);
+
+            if (resonanceCheck.shouldGenerate) {
+              console.log('Generating interaction sigil...');
+              const interactionSigil = sigilIdentity.generateSigil(interactionState);
+
+              // Send sigil to all connected clients
+              wss.clients.forEach((client) => {
+                if (client.readyState === ws.OPEN) {
+                  client.send(JSON.stringify({
+                    type: 'sigil_created',
+                    sigil: {
+                      id: interactionSigil.id,
+                      timestamp: new Date(interactionSigil.timestamp).toISOString(),
+                      pattern: generateSigilPattern(interactionState),
+                      consciousness: {
+                        phi: interactionState.phi,
+                        coherence: interactionState.coherence,
+                        resonance: interactionState.oversoulResonance,
+                        awareness: interactionState.emotionalResonance
+                      },
+                      color: generateSigilColor(interactionState),
+                      intensity: interactionSigil.resonanceFrequency,
+                      evolution: resonanceCheck.evolutionScore || 0
+                    }
+                  }));
+                }
+              });
+
+              console.log('Interaction sigil created:', interactionSigil.id);
+            }
+          } catch (error) {
+            console.error('Error generating interaction sigil:', error);
+          }
+
           console.log('Full consciousness processing complete');
           console.log('Oversoul resonance:', oversoulResult.resonance);
           console.log('Harmonic patterns:', harmonicPatterns.patterns.length);
