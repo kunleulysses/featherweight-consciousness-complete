@@ -5,7 +5,7 @@
 
 import { EventEmitter } from 'events';
 import { createHash } from 'crypto';
-import getPerformanceConfig from './performance-config.js';
+import { getPerformanceConfig } from './performance-config.js';
 
 class PerformanceOptimizer extends EventEmitter {
   constructor() {
